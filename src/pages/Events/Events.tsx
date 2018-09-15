@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from '@styled';
-import { RouteComponentProps, Switch, Route } from 'react-router-dom';
+import { RouteComponentProps, Switch, Route, Link } from 'react-router-dom';
 import { firebase } from 'config';
-import { Card } from 'antd';
+import { Card, Button } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
 
 import { Header, Loading } from 'components';
@@ -68,15 +68,17 @@ class Events extends React.Component<RouteComponentProps, State> {
     return (
       <Content>
         {events.map(a => (
-          <EventCard key={a.id}>
-            <Card.Meta
-              title={a.name}
-              description={`Created ${distanceInWordsToNow(
-                new Date(a.createdAt),
-                { addSuffix: true }
-              )}`}
-            />
-          </EventCard>
+          <Link to={`/events/${a.id}`} key={a.id}>
+            <EventCard>
+              <Card.Meta
+                title={a.name}
+                description={`Created ${distanceInWordsToNow(
+                  new Date(a.createdAt),
+                  { addSuffix: true }
+                )}`}
+              />
+            </EventCard>
+          </Link>
         ))}
       </Content>
     );
@@ -85,7 +87,21 @@ class Events extends React.Component<RouteComponentProps, State> {
   render() {
     return (
       <Container>
-        <Header title="Events" titleLink="/" />
+        <Header
+          title="Events"
+          titleLink="/"
+          headerRight={() => (
+            <Route
+              exact
+              path="/"
+              component={() => (
+                <Button type="primary" onClick={this.newEvent}>
+                  New Event
+                </Button>
+              )}
+            />
+          )}
+        />
 
         <Switch>
           <Route exact path="/events/new" component={NewEvent} />
