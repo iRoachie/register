@@ -6,7 +6,7 @@ import 'antd/dist/antd.css';
 import 'firebase/auth';
 import 'firebase/database';
 
-import App from './containers/App';
+import Shell from './containers/Shell';
 
 const config = {
   apiKey: process.env.FIREBASE_apiKey,
@@ -19,4 +19,4 @@ if (!firebase.apps.length) {
   firebase.initializeApp(config);
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<Shell />, document.getElementById('root'));

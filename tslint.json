@@ -6,7 +6,8 @@
     "variable-name": false,
     "function-name": false,
     "jsx-no-lambda": false,
-    "import-name": false
+    "import-name": false,
+    "jsx-boolean-value": false
   },
   "rulesDirectory": []
 }
