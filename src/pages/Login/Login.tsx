@@ -3,10 +3,9 @@ import styled from '@styled';
 import { RouteComponentProps } from 'react-router';
 import { Button, Card, Input, Form, Icon } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
-import firebase from 'firebase/app';
-import 'firebase/auth';
 
 import { Loading } from 'components';
+import { firebase } from 'config';
 
 const FormItem = Form.Item;
 

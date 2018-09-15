@@ -1,20 +1,19 @@
 import React from 'react';
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { firebase } from 'config';
 
-const AuthContext = React.createContext({ loggedIn: false });
+const AuthContext = React.createContext({ loggedIn: null });
 
 interface Props {
   children: React.ReactNode;
 }
 
 interface State {
-  loggedIn: boolean;
+  loggedIn: boolean | null;
 }
 
 class AuthProvider extends React.Component<Props, State> {
   state = {
-    loggedIn: false,
+    loggedIn: null,
   };
 
   componentDidMount() {
