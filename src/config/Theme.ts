@@ -8,7 +8,7 @@ interface ThemeInterface {
 
 const Theme: ThemeInterface = {
   colors: {
-    primary: 'hsl(190, 40%, 41%)',
+    primary: 'hsl(209, 100%, 54%)',
     error: 'hsl(357, 91%, 55%)',
   },
   sidebarWidth: '200px',

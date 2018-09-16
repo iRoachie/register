@@ -111,12 +111,12 @@ const MenuLink = styled(NavLink)`
 
   &:hover {
     color: #fff;
-    background-color: hsl(190, 40%, 35%);
+    background-color: hsl(207, 100%, 58%);
   }
 
   &.active {
     color: #fff;
-    background-color: hsl(190, 40%, 50%);
+    background-color: hsl(207, 100%, 43%);
     text-decoration: none;
   }
 `;
