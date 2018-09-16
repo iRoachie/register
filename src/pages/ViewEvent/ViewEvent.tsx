@@ -7,6 +7,7 @@ import { firebase } from 'config';
 
 import { Icon } from 'antd';
 import Categories from '../Categories';
+import Attendees from '../Attendees';
 
 interface Params {
   eventId: string;
@@ -75,6 +76,11 @@ class ViewEvent extends React.Component<Props, State> {
                 exact
                 path="/events/:eventId/categories"
                 component={Categories}
+              />
+              <Route
+                exact
+                path="/events/:eventId/attendees"
+                component={Attendees}
               />
             </Switch>
           </Content>

@@ -2,5 +2,6 @@ import Login from './Login';
 import Events from './Events';
 import ViewEvent from './ViewEvent';
 import Categories from './Categories';
+import Attendees from './Attendees';
 
-export { Login, Events, ViewEvent, Categories };
+export { Login, Events, ViewEvent, Categories, Attendees };

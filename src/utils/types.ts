@@ -12,7 +12,8 @@ export interface Category {
 }
 
 export interface Attendee {
+  id: string;
   name: string;
-  category: string;
+  category: Category;
   present: boolean;
 }
