@@ -1,11 +1,12 @@
 import React from 'react';
-import { RouteComponentProps, NavLink } from 'react-router-dom';
+import { RouteComponentProps, NavLink, Switch, Route } from 'react-router-dom';
 import styled from '@styled';
 import { Sidebar, Header, Loading } from 'components';
-import { Event } from 'utils';
+import { IEvent } from 'utils';
 import { firebase } from 'config';
 
 import { Icon } from 'antd';
+import Categories from '../Categories';
 
 interface Params {
   eventId: string;
@@ -15,7 +16,7 @@ type Props = RouteComponentProps<Params>;
 
 interface State {
   loading: boolean;
-  event: Event | null;
+  event: IEvent | null;
 }
 
 class ViewEvent extends React.Component<Props, State> {
@@ -38,7 +39,7 @@ class ViewEvent extends React.Component<Props, State> {
         .doc(eventId)
         .get();
 
-      this.setState({ loading: false, event: event.data() as Event });
+      this.setState({ loading: false, event: event.data() as IEvent });
     } catch (error) {
       console.error(error);
       this.setState({ loading: false });
@@ -68,6 +69,14 @@ class ViewEvent extends React.Component<Props, State> {
 
           <Content>
             <Header title={event.name} inset />
+
+            <Switch>
+              <Route
+                exact
+                path="/events/:eventId/categories"
+                component={Categories}
+              />
+            </Switch>
           </Content>
         </Container>
       );

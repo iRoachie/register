@@ -141,6 +141,7 @@ const Box = styled(Card)`
   text-align: center;
 `;
 
+// @ts-ignore
 const LoginButton = styled(Button).attrs({
   size: 'large',
 })`

@@ -6,13 +6,13 @@ import { Card, Button } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
 
 import { Header, Loading, Wrapper } from 'components';
-import { Event } from 'utils';
+import { IEvent } from 'utils';
 import NoEvents from './components/NoEvents';
 import NewEvent from './components/NewEvent';
 
 interface State {
   loading: boolean;
-  events: Event[];
+  events: IEvent[];
 }
 
 class Events extends React.Component<RouteComponentProps, State> {
@@ -42,7 +42,7 @@ class Events extends React.Component<RouteComponentProps, State> {
             ({
               id: a.id,
               ...a.data(),
-            } as Event)
+            } as IEvent)
         ),
         loading: false,
       });
