@@ -13,9 +13,10 @@ const Loading = () => (
 const Content = styled.main`
   background: hsl(0, 0%, 100%);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   min-height: 100vh;
+  padding-top: 30px;
 `;
 
 export default Loading;
