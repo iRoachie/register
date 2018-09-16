@@ -1,7 +1,7 @@
 import React from 'react';
 import { Wrapper, Loading, Section } from 'components';
 import { firebase } from 'config';
-import { IEvent } from 'utils';
+import { Category } from 'utils';
 import styled from '@styled';
 import { Form, Input, Icon, Button, message, Tag } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
@@ -12,7 +12,7 @@ import NoCategories from './components/NoCategories';
 interface State {
   fetching: boolean;
   loading: boolean;
-  event: IEvent | null;
+  categories: Category[];
 }
 
 interface Params {
@@ -28,7 +28,7 @@ class Categories extends React.Component<Props, State> {
     this.state = {
       fetching: true,
       loading: false,
-      event: null,
+      categories: [],
     };
   }
 
@@ -44,11 +44,18 @@ class Categories extends React.Component<Props, State> {
         .firestore()
         .collection('events')
         .doc(eventId)
+        .collection('categories')
         .get();
 
-      const event = response.data() as IEvent;
+      const categories = response.docs.map(
+        a =>
+          ({
+            ...a.data(),
+            id: a.id,
+          } as Category)
+      );
 
-      this.setState({ event, fetching: false });
+      this.setState({ categories, fetching: false });
     } catch (error) {
       this.setState({ fetching: false });
       console.error(error);
@@ -69,25 +76,24 @@ class Categories extends React.Component<Props, State> {
 
   createCategory = async (category: string) => {
     try {
-      const { event } = this.state;
+      const { categories } = this.state;
       const { eventId } = this.props.match.params;
 
-      if (event!.categories && event!.categories!.includes(category)) {
+      if (
+        categories &&
+        categories.find(a => a.name.toLowerCase() === category.toLowerCase())
+      ) {
         message.error('Category already added');
         this.setState({ loading: false });
         return;
       }
 
-      const changes = {
-        ...event,
-        categories: [...(event!.categories || []), category],
-      };
-
       await firebase
         .firestore()
         .collection('events')
         .doc(eventId)
-        .set(changes);
+        .collection('categories')
+        .add({ name: category });
 
       this.props.form.setFields({ category: '' });
 
@@ -102,66 +108,62 @@ class Categories extends React.Component<Props, State> {
   };
 
   render() {
-    const { loading, fetching, event } = this.state;
+    const { loading, fetching, categories } = this.state;
     const { getFieldDecorator } = this.props.form;
 
     if (fetching) {
       return <Loading />;
     }
 
-    if (!!event) {
-      const categories = event.categories || [];
+    return (
+      <Container>
+        <Wrapper>
+          <Section
+            title="New Category"
+            description="Add a new category to group attendees by."
+          >
+            <CategoryForm onSubmit={this.submitHandler} layout="inline">
+              <Form.Item>
+                {getFieldDecorator('category', {
+                  rules: [
+                    {
+                      required: true,
+                      message: 'Please input category name!',
+                    },
+                  ],
+                })(
+                  <Input
+                    type="text"
+                    disabled={loading}
+                    prefix={
+                      <Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />
+                    }
+                    placeholder="Category"
+                  />
+                )}
+              </Form.Item>
 
-      return (
-        <Container>
-          <Wrapper>
-            <Section
-              title="New Category"
-              description="Add a new category to group attendees by."
-            >
-              <CategoryForm onSubmit={this.submitHandler} layout="inline">
-                <Form.Item>
-                  {getFieldDecorator('category', {
-                    rules: [
-                      {
-                        required: true,
-                        message: 'Please input category name!',
-                      },
-                    ],
-                  })(
-                    <Input
-                      type="text"
-                      disabled={loading}
-                      prefix={
-                        <Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />
-                      }
-                      placeholder="Category"
-                    />
-                  )}
-                </Form.Item>
+              <Button htmlType="submit" type="primary" loading={loading}>
+                Add Category
+              </Button>
+            </CategoryForm>
+          </Section>
 
-                <Button htmlType="submit" type="primary" loading={loading}>
-                  Add Category
-                </Button>
-              </CategoryForm>
-            </Section>
-
-            <Section
-              title="Categories"
-              description="List of all categories for this event."
-            >
-              {categories.length === 0 ? (
-                <NoCategories />
-              ) : (
-                categories.map(a => <CategoryTag key={a}>{a}</CategoryTag>)
-              )}
-            </Section>
-          </Wrapper>
-        </Container>
-      );
-    }
-
-    return null;
+          <Section
+            title="Categories"
+            description="List of all categories for this event."
+          >
+            {categories.length === 0 ? (
+              <NoCategories />
+            ) : (
+              categories.map(a => (
+                <CategoryTag key={a.id}>{a.name}</CategoryTag>
+              ))
+            )}
+          </Section>
+        </Wrapper>
+      </Container>
+    );
   }
 }
 
