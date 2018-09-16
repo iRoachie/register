@@ -2,20 +2,20 @@ import React from 'react';
 import styled from '@styled';
 
 interface Props {
-  title: string;
+  title: string | React.ReactNode;
   description: string;
   children: React.ReactNode;
 }
 
-const Section: React.SFC<Props> = props => {
+const Section: React.SFC<Props> = ({ title, description, children }) => {
   return (
     <Container>
       <Meta>
-        <h3>{props.title}</h3>
-        <p>{props.description}</p>
+        {typeof title !== 'string' ? title : <h3>{title}</h3>}
+        <p>{description}</p>
       </Meta>
 
-      <Content>{props.children}</Content>
+      <Content>{children}</Content>
     </Container>
   );
 };
