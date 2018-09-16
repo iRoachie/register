@@ -86,7 +86,6 @@ class Login extends React.Component<
                 ],
               })(
                 <Input
-                  size="large"
                   type="email"
                   disabled={loading}
                   prefix={
@@ -104,7 +103,6 @@ class Login extends React.Component<
                 ],
               })(
                 <Input
-                  size="large"
                   type="password"
                   disabled={loading}
                   prefix={
@@ -142,9 +140,7 @@ const Box = styled(Card)`
 `;
 
 // @ts-ignore
-const LoginButton = styled(Button).attrs({
-  size: 'large',
-})`
+const LoginButton = styled(Button)`
   width: 100%;
 `;
 

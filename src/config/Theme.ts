@@ -3,6 +3,7 @@ interface ThemeInterface {
     primary: string;
     error: string;
   };
+  border: string;
   sidebarWidth: string;
 }
 
@@ -12,6 +13,7 @@ const Theme: ThemeInterface = {
     error: 'hsl(357, 91%, 55%)',
   },
   sidebarWidth: '200px',
+  border: '1px solid rgba(0,0,0,0.1)',
 };
 
 export { ThemeInterface };

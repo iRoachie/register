@@ -3,17 +3,13 @@ import styled from '@styled';
 import { Card } from 'antd';
 
 const NoCategories = () => (
-  <Content>
+  <article>
     <EmptyCard>
-      <h2>No Categories Added as yet</h2>
+      <h2>No Categories Added as Yet</h2>
       <p>Fortunately, it’s very easy to create one.</p>
     </EmptyCard>
-  </Content>
+  </article>
 );
-
-const Content = styled.div`
-  margin-top: 30px;
-`;
 
 const EmptyCard = styled(Card)`
   padding: 15px;

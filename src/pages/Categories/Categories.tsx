@@ -1,12 +1,14 @@
 import React from 'react';
-import { Wrapper, Hr, Loading } from 'components';
+import { Wrapper, Loading } from 'components';
 import { firebase } from 'config';
 import { IEvent } from 'utils';
 import styled from '@styled';
-import { Form, Input, Icon, Button, message } from 'antd';
+import { Form, Input, Icon, Button, message, Tag } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
+
 import NoCategories from './components/NoCategories';
+import Section from './components/Section';
 
 interface State {
   fetching: boolean;
@@ -114,61 +116,68 @@ class Categories extends React.Component<Props, State> {
       return (
         <Container>
           <Wrapper>
-            <Header>
-              <h2>Categories</h2>
-              <p>Categories are meta in which attendees are grouped by.</p>
-              <Hr />
-            </Header>
+            <Section
+              title="New Category"
+              description="Add a new category to group attendees by."
+            >
+              <CategoryForm onSubmit={this.submitHandler} layout="inline">
+                <Form.Item>
+                  {getFieldDecorator('category', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input category name!',
+                      },
+                    ],
+                  })(
+                    <Input
+                      type="text"
+                      disabled={loading}
+                      prefix={
+                        <Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />
+                      }
+                      placeholder="Category"
+                    />
+                  )}
+                </Form.Item>
 
-            <CategoryForm onSubmit={this.submitHandler} layout="inline">
-              <Form.Item>
-                {getFieldDecorator('category', {
-                  rules: [
-                    { required: true, message: 'Please input category name!' },
-                  ],
-                })(
-                  <Input
-                    size="large"
-                    type="text"
-                    disabled={loading}
-                    prefix={
-                      <Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />
-                    }
-                    placeholder="Category"
-                  />
-                )}
-              </Form.Item>
+                <Button htmlType="submit" type="primary" loading={loading}>
+                  Add Category
+                </Button>
+              </CategoryForm>
+            </Section>
 
-              <Button
-                htmlType="submit"
-                size="large"
-                type="primary"
-                loading={loading}
-              >
-                Add Category
-              </Button>
-            </CategoryForm>
-
-            {categories.length === 0 && <NoCategories />}
+            <Section
+              title="Categories"
+              description="List of all categories for this event."
+            >
+              {categories.length === 0 ? (
+                <NoCategories />
+              ) : (
+                categories.map(a => <CategoryTag key={a}>{a}</CategoryTag>)
+              )}
+            </Section>
           </Wrapper>
         </Container>
       );
     }
+
+    return null;
   }
 }
 
 const Container = styled.div`
   margin-top: 30px;
-  text-align: center;
-`;
-
-const Header = styled.div`
-  margin-bottom: 15px;
 `;
 
 // @ts-ignore
 const CategoryForm = styled(Form)`
-  margin-top: 30px;
+  display: flex;
+  align-items: center;
+`;
+
+const CategoryTag = styled(Tag)`
+  font-size: 14px;
 `;
 
 export default Form.create()(Categories);

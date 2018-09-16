@@ -62,7 +62,6 @@ class NewEvent extends React.Component<Props, State> {
               rules: [{ required: true, message: 'Please input event name!' }],
             })(
               <Input
-                size="large"
                 type="text"
                 disabled={loading}
                 prefix={
@@ -73,12 +72,7 @@ class NewEvent extends React.Component<Props, State> {
             )}
           </Form.Item>
 
-          <Button
-            htmlType="submit"
-            size="large"
-            type="primary"
-            loading={loading}
-          >
+          <Button htmlType="submit" type="primary" loading={loading}>
             Create Event
           </Button>
         </Form>
