@@ -5,6 +5,7 @@ interface ThemeInterface {
   };
   border: string;
   sidebarWidth: string;
+  headerHeight: string;
 }
 
 const Theme: ThemeInterface = {
@@ -13,6 +14,7 @@ const Theme: ThemeInterface = {
     error: 'hsl(357, 91%, 55%)',
   },
   sidebarWidth: '200px',
+  headerHeight: '67px',
   border: '1px solid rgba(0,0,0,0.1)',
 };
 

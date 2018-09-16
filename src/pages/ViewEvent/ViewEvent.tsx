@@ -69,20 +69,22 @@ class ViewEvent extends React.Component<Props, State> {
           </Sidebar>
 
           <Content>
-            <Header title={event.name} inset />
+            <Header title={event.name} inset fixed />
 
-            <Switch>
-              <Route
-                exact
-                path="/events/:eventId/categories"
-                component={Categories}
-              />
-              <Route
-                exact
-                path="/events/:eventId/attendees"
-                component={Attendees}
-              />
-            </Switch>
+            <ContentWrapper>
+              <Switch>
+                <Route
+                  exact
+                  path="/events/:eventId/categories"
+                  component={Categories}
+                />
+                <Route
+                  exact
+                  path="/events/:eventId/attendees"
+                  component={Attendees}
+                />
+              </Switch>
+            </ContentWrapper>
           </Content>
         </Container>
       );
@@ -97,8 +99,14 @@ const Container = styled.div`
   display: flex;
 `;
 
+const ContentWrapper = styled.div`
+  position: relative;
+  top: ${({ theme }) => theme.headerHeight};
+`;
+
 const Content = styled.main`
   flex: 1;
+  margin-left: ${({ theme }) => theme.sidebarWidth};
 `;
 
 const MenuLink = styled(NavLink)`

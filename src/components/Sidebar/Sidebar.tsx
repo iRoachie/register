@@ -79,6 +79,9 @@ const Aside = styled.aside`
   padding-top: 30px;
   width: ${({ theme }) => theme.sidebarWidth};
   background-color: ${({ theme }) => theme.colors.primary};
+  position: fixed;
+  height: 100%;
+  z-index: 3;
 `;
 
 const Logo = styled.svg`

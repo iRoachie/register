@@ -7,6 +7,7 @@ interface Props {
   title?: string;
   titleLink?: string;
   inset?: boolean;
+  fixed?: boolean;
   headerRight?(): React.ReactElement<any> | null;
 }
 
@@ -16,10 +17,10 @@ class Header extends React.Component<Props> {
   };
 
   render() {
-    const { title, titleLink, headerRight, inset } = this.props;
+    const { title, titleLink, headerRight, inset, fixed } = this.props;
 
     return (
-      <Content inset={inset}>
+      <Content inset={inset} fixed={fixed}>
         <Title href={titleLink}>
           <h1>{title}</h1>
         </Title>
@@ -44,13 +45,17 @@ const Title = styled.a`
 `;
 
 const Content = styled.header`
-  height: 67px;
+  height: ${({ theme }) => theme.headerHeight};
   border-bottom: 1px solid #f1f1f1;
   width: 100%;
   display: flex;
   justify-content: space-between;
+  background: #fff;
+  z-index: 2;
   align-items: center;
   padding: ${(props: Partial<Props>) => (props.inset ? '0 15px' : 0)};
+  position: ${({ fixed }) => (fixed ? 'fixed' : 'static')};
+  left: ${({ inset, theme }) => (inset ? theme.sidebarWidth : 0)};
 `;
 
 const HeaderRight = styled.div`
