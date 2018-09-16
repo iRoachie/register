@@ -5,9 +5,8 @@ import { firebase } from 'config';
 import { Card, Button } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
 
-import { Header, Loading, Wrapper } from 'components';
+import { Header, Loading, Wrapper, EmptyData } from 'components';
 import { IEvent } from 'utils';
-import NoEvents from './components/NoEvents';
 import NewEvent from './components/NewEvent';
 
 interface State {
@@ -66,7 +65,16 @@ class Events extends React.Component<RouteComponentProps, State> {
     }
 
     if (events.length === 0) {
-      return <NoEvents newEvent={this.newEvent} />;
+      return (
+        <EmptyData
+          title="No Events Added as yet"
+          description="Fortunately, it’s very easy to create one."
+        >
+          <Button size="large" type="primary" onClick={this.newEvent}>
+            Create Event
+          </Button>
+        </EmptyData>
+      );
     }
 
     return (

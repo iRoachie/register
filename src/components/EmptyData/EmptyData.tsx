@@ -2,11 +2,19 @@ import React from 'react';
 import styled from '@styled';
 import { Card } from 'antd';
 
-const NoCategories = () => (
+interface Props {
+  title: string;
+  description: string;
+  children?: React.ReactNode;
+}
+
+const EmptyData: React.SFC<Props> = ({ title, description, children }) => (
   <article>
     <EmptyCard>
-      <h2>No Categories Added as Yet</h2>
-      <p>Fortunately, it’s very easy to create one.</p>
+      <h2>{title}</h2>
+      <p>{description}</p>
+
+      {children}
     </EmptyCard>
   </article>
 );
@@ -20,4 +28,4 @@ const EmptyCard = styled(Card)`
   }
 `;
 
-export default NoCategories;
+export default EmptyData;

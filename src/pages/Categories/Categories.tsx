@@ -1,13 +1,11 @@
 import React from 'react';
-import { Wrapper, Loading, Section } from 'components';
+import { Wrapper, Loading, Section, EmptyData } from 'components';
 import { firebase } from 'config';
 import { Category } from 'utils';
 import styled from '@styled';
 import { Form, Input, Icon, Button, message, Tag } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
-
-import NoCategories from './components/NoCategories';
 
 interface State {
   fetching: boolean;
@@ -154,7 +152,10 @@ class Categories extends React.Component<Props, State> {
             description="List of all categories for this event."
           >
             {categories.length === 0 ? (
-              <NoCategories />
+              <EmptyData
+                title="No Categories Added as Yet"
+                description="Fortunately, it’s very easy to create one."
+              />
             ) : (
               categories.map(a => (
                 <CategoryTag key={a.id}>{a.name}</CategoryTag>
