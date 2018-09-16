@@ -60,7 +60,7 @@ const HeaderRight = styled.div`
 
 const Separator = styled.div`
   height: 30px;
-  width: 0.5px;
+  width: 1px;
   background-color: rgba(0, 0, 0, 0.2);
   margin: 0 20px;
 `;
