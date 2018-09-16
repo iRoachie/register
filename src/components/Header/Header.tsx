@@ -6,6 +6,7 @@ import { firebase } from 'config';
 interface Props {
   title?: string;
   titleLink?: string;
+  inset?: boolean;
   headerRight?(): React.ReactElement<any> | null;
 }
 
@@ -15,13 +16,13 @@ class Header extends React.Component<Props> {
   };
 
   render() {
-    const { title, titleLink, headerRight } = this.props;
+    const { title, titleLink, headerRight, inset } = this.props;
 
     return (
-      <Content>
-        <a href={titleLink}>
-          <Title>{title}</Title>
-        </a>
+      <Content inset={inset}>
+        <Title href={titleLink}>
+          <h1>{title}</h1>
+        </Title>
 
         <HeaderRight>
           {!!headerRight && headerRight()}
@@ -34,9 +35,12 @@ class Header extends React.Component<Props> {
     );
   }
 }
-
-const Title = styled.h1`
+const Title = styled.a`
   margin-bottom: 0;
+
+  h1 {
+    margin-bottom: 0;
+  }
 `;
 
 const Content = styled.header`
@@ -46,6 +50,7 @@ const Content = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: ${(props: Partial<Props>) => (props.inset ? '0 15px' : 0)};
 `;
 
 const HeaderRight = styled.div`

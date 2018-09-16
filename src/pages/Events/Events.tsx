@@ -5,7 +5,7 @@ import { firebase } from 'config';
 import { Card, Button } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
 
-import { Header, Loading } from 'components';
+import { Header, Loading, Wrapper } from 'components';
 import { Event } from 'utils';
 import NoEvents from './components/NoEvents';
 import NewEvent from './components/NewEvent';
@@ -25,7 +25,11 @@ class Events extends React.Component<RouteComponentProps, State> {
     };
   }
 
-  componentDidMount = async () => {
+  componentDidMount() {
+    this.getEvents();
+  }
+
+  getEvents = async () => {
     try {
       const { docs: events } = await firebase
         .firestore()
@@ -87,26 +91,28 @@ class Events extends React.Component<RouteComponentProps, State> {
   render() {
     return (
       <Container>
-        <Header
-          title="Events"
-          titleLink="/"
-          headerRight={() => (
-            <Route
-              exact
-              path="/"
-              component={() => (
-                <Button type="primary" onClick={this.newEvent}>
-                  New Event
-                </Button>
-              )}
-            />
-          )}
-        />
+        <Wrapper>
+          <Header
+            title="Events"
+            titleLink="/"
+            headerRight={() => (
+              <Route
+                exact
+                path="/"
+                component={() => (
+                  <Button type="primary" onClick={this.newEvent}>
+                    New Event
+                  </Button>
+                )}
+              />
+            )}
+          />
 
-        <Switch>
-          <Route exact path="/events/new" component={NewEvent} />
-          <Route component={this.renderContent} />
-        </Switch>
+          <Switch>
+            <Route exact path="/events/new" component={NewEvent} />
+            <Route component={this.renderContent} />
+          </Switch>
+        </Wrapper>
       </Container>
     );
   }
