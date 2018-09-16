@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrapper, Loading } from 'components';
+import { Wrapper, Loading, Section } from 'components';
 import { firebase } from 'config';
 import { IEvent } from 'utils';
 import styled from '@styled';
@@ -8,7 +8,6 @@ import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
 
 import NoCategories from './components/NoCategories';
-import Section from './components/Section';
 
 interface State {
   fetching: boolean;
