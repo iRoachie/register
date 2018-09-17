@@ -196,8 +196,8 @@ export default class Register extends React.Component<Props, State> {
 }
 
 const Items = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   padding-bottom: 15px;
   border-bottom: ${({ theme }) => theme.border};
 `;
