@@ -171,7 +171,11 @@ const Container = styled.div`
 // @ts-ignore
 const CategoryForm = styled(Form)`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+
+  button {
+    margin-top: 4px;
+  }
 `;
 
 const CategoryTag = styled(Tag)`

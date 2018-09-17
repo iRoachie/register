@@ -3,7 +3,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Card, Input, Icon, Checkbox, List } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
-import { Wrapper, Loading, AttendeesList } from 'components';
+import { Wrapper, Loading, AttendeesList, EmptyData } from 'components';
 import { Category, Attendee } from 'utils';
 import { firebase } from 'config';
 import styled from '@styled';
@@ -146,13 +146,20 @@ export default class Register extends React.Component<Props, State> {
 
     return (
       <RegisterWrapper>
-        <Items>
-          {categories.map(a => (
-            <Score key={a.id}>
-              <Card.Meta title={`${a.present}`} description={a.name} />
-            </Score>
-          ))}
-        </Items>
+        {categories.length === 0 ? (
+          <EmptyData
+            title="No Tallies as Yet"
+            description="Add Attendees to see the tallies here"
+          />
+        ) : (
+          <Items>
+            {categories.map(a => (
+              <Score key={a.id}>
+                <Card.Meta title={`${a.present}`} description={a.name} />
+              </Score>
+            ))}
+          </Items>
+        )}
 
         <Search
           placeholder="Search attendees"
@@ -189,8 +196,6 @@ export default class Register extends React.Component<Props, State> {
 const Items = styled.div`
   display: flex;
   flex-wrap: wrap;
-  margin-top: 30px;
-  margin-bottom: 30px;
   padding-bottom: 15px;
   border-bottom: ${({ theme }) => theme.border};
 `;
@@ -198,6 +203,7 @@ const Items = styled.div`
 // @ts-ignore
 const Search = styled(Input)`
   margin-bottom: 20px;
+  margin-top: 20px;
 `;
 
 const Score = styled(Card)`
@@ -210,6 +216,7 @@ const Score = styled(Card)`
 
 const RegisterWrapper = styled(Wrapper)`
   max-width: 800px;
+  padding-top: 30px;
 `;
 
 const AttendeeCheckbox = styled(Checkbox)`
