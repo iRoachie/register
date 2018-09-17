@@ -10,8 +10,7 @@ import styled from '@styled';
 
 interface State {
   search: string;
-  loading: boolean;
-  fetching: boolean;
+  fetched: number;
   categories: Category[];
   attendees: Attendee[];
   filteredAttendees: Attendee[];
@@ -24,13 +23,15 @@ interface Params {
 type Props = RouteComponentProps<Params>;
 
 export default class Register extends React.Component<Props, State> {
+  attendeesSubscription: () => void;
+  categoriesSubscription: () => void;
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
       search: '',
-      fetching: true,
-      loading: false,
+      fetched: 0,
       categories: [],
       attendees: [],
       filteredAttendees: [],
@@ -38,56 +39,67 @@ export default class Register extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.getData();
-  }
-
-  getData = async () => {
     const { eventId } = this.props.match.params;
 
-    try {
-      const [a, b] = await Promise.all([
-        firebase
-          .firestore()
-          .collection('events')
-          .doc(eventId)
-          .collection('categories')
-          .get(),
-        firebase
-          .firestore()
-          .collection('events')
-          .doc(eventId)
-          .collection('attendees')
-          .get(),
-      ]);
+    this.attendeesSubscription = firebase
+      .firestore()
+      .collection('events')
+      .doc(eventId)
+      .collection('attendees')
+      .onSnapshot(this.updateAttendees);
 
-      const attendees = b.docs.map(
-        a =>
-          ({
-            id: a.id,
-            ...a.data(),
-          } as Attendee)
-      );
+    this.categoriesSubscription = firebase
+      .firestore()
+      .collection('events')
+      .doc(eventId)
+      .collection('categories')
+      .onSnapshot(this.updateCategories);
+  }
 
-      const categories = a.docs.map(
-        a =>
-          ({
-            id: a.id,
-            ...a.data(),
-            present: attendees.filter(b => b.category.id === a.id && b.present)
-              .length,
-          } as Category)
-      );
+  componentWillUnmount() {
+    this.attendeesSubscription();
+    this.categoriesSubscription();
+  }
 
-      this.setState({
-        categories,
-        attendees,
-        fetching: false,
-        filteredAttendees: attendees,
-      });
-    } catch (error) {
-      console.error(error);
-      this.setState({ fetching: false });
-    }
+  updateAttendees = (snapshot: firebase.firestore.QuerySnapshot) => {
+    const { categories } = this.state;
+    const attendees = snapshot.docs.map(
+      a =>
+        ({
+          id: a.id,
+          ...a.data(),
+        } as Attendee)
+    );
+
+    this.setState(({ fetched }) => ({
+      attendees,
+      filteredAttendees: attendees,
+      fetched: fetched + 1,
+      categories: categories.map(a => ({
+        ...a,
+        present: attendees.filter(b => b.category.id === a.id && b.present)
+          .length,
+      })),
+    }));
+  };
+
+  updateCategories = (snapshot: firebase.firestore.QuerySnapshot) => {
+    const { attendees } = this.state;
+
+    const categories = snapshot.docs.map(
+      a =>
+        ({
+          id: a.id,
+          ...a.data(),
+          present: attendees.filter(b => b.category.id === a.id && b.present)
+            .length,
+        } as Category)
+    );
+
+    this.setState(({ fetched }) => ({
+      categories,
+      fetched: fetched + 1,
+    }));
   };
 
   updateSearch = (event: React.SyntheticEvent<HTMLInputElement>) => {
@@ -95,7 +107,7 @@ export default class Register extends React.Component<Props, State> {
 
     const input = value.trim();
 
-    this.setState(({ attendees, search }) => ({
+    this.setState(({ attendees }) => ({
       search: value,
       filteredAttendees:
         input === ''
@@ -120,17 +132,15 @@ export default class Register extends React.Component<Props, State> {
         .update({
           present: checked,
         });
-
-      await this.getData();
     } catch (error) {
       console.log(error);
     }
   };
 
   render() {
-    const { fetching, categories, search, filteredAttendees } = this.state;
+    const { fetched, categories, search, filteredAttendees } = this.state;
 
-    if (fetching) {
+    if (fetched < 2) {
       return <Loading />;
     }
 
