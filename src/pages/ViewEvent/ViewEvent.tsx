@@ -8,6 +8,7 @@ import { firebase } from 'config';
 import { Icon } from 'antd';
 import Categories from '../Categories';
 import Attendees from '../Attendees';
+import Register from '../Register';
 
 interface Params {
   eventId: string;
@@ -21,10 +22,14 @@ interface State {
 }
 
 class ViewEvent extends React.Component<Props, State> {
-  state = {
-    event: { id: 'as', name: 'aea', createdAt: 'as' },
-    loading: true,
-  };
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      event: null,
+      loading: true,
+    };
+  }
 
   componentDidMount() {
     this.getEvent();
@@ -82,6 +87,11 @@ class ViewEvent extends React.Component<Props, State> {
                   exact
                   path="/events/:eventId/attendees"
                   component={Attendees}
+                />
+                <Route
+                  exact
+                  path="/events/:eventId/register"
+                  component={Register}
                 />
               </Switch>
             </ContentWrapper>

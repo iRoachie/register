@@ -9,6 +9,7 @@ export interface IEvent {
 export interface Category {
   id: string;
   name: string;
+  present?: number;
 }
 
 export interface Attendee {
