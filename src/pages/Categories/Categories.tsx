@@ -20,6 +20,8 @@ interface Params {
 type Props = FormComponentProps & RouteComponentProps<Params>;
 
 class Categories extends React.Component<Props, State> {
+  categoriesSubscription: () => void;
+
   constructor(props: Props) {
     super(props);
 
@@ -31,33 +33,30 @@ class Categories extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.getCategories();
+    const { eventId } = this.props.match.params;
+
+    this.categoriesSubscription = firebase
+      .firestore()
+      .collection('events')
+      .doc(eventId)
+      .collection('categories')
+      .onSnapshot(this.updateCategories);
   }
 
-  getCategories = async () => {
-    try {
-      const { eventId } = this.props.match.params;
+  componentWillUnmount() {
+    this.categoriesSubscription();
+  }
 
-      const response = await firebase
-        .firestore()
-        .collection('events')
-        .doc(eventId)
-        .collection('categories')
-        .get();
+  updateCategories = (snapshot: firebase.firestore.QuerySnapshot) => {
+    const categories = snapshot.docs.map(
+      a =>
+        ({
+          ...a.data(),
+          id: a.id,
+        } as Category)
+    );
 
-      const categories = response.docs.map(
-        a =>
-          ({
-            ...a.data(),
-            id: a.id,
-          } as Category)
-      );
-
-      this.setState({ categories, fetching: false });
-    } catch (error) {
-      this.setState({ fetching: false });
-      console.error(error);
-    }
+    this.setState({ categories, fetching: false });
   };
 
   submitHandler = (event: React.SyntheticEvent) => {
@@ -93,13 +92,10 @@ class Categories extends React.Component<Props, State> {
         .collection('categories')
         .add({ name: category });
 
-      this.props.form.setFields({ category: '' });
-
-      await this.getCategories();
-
-      this.setState({ loading: false });
-
       message.success(`Category "${category}" created.`, 3);
+
+      this.props.form.setFields({ category: '' });
+      this.setState({ loading: false });
     } catch (error) {
       console.error(error);
     }
