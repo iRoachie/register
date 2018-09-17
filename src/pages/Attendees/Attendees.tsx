@@ -18,7 +18,7 @@ import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
 
 interface State {
-  fetching: boolean;
+  fetched: number;
   loading: boolean;
   search: string;
   categories: Category[];
@@ -33,11 +33,14 @@ interface Params {
 type Props = FormComponentProps & RouteComponentProps<Params>;
 
 class Attendees extends React.Component<Props, State> {
+  categoriesSubscription: () => void;
+  attendeesSubscription: () => void;
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      fetching: true,
+      fetched: 0,
       loading: false,
       categories: [],
       filteredAttendees: [],
@@ -47,54 +50,57 @@ class Attendees extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.getData();
+    const { eventId } = this.props.match.params;
+
+    this.categoriesSubscription = firebase
+      .firestore()
+      .collection('events')
+      .doc(eventId)
+      .collection('categories')
+      .onSnapshot(this.updateCategories);
+
+    this.attendeesSubscription = firebase
+      .firestore()
+      .collection('events')
+      .doc(eventId)
+      .collection('attendees')
+      .onSnapshot(this.updateAttendees);
   }
 
-  getData = async () => {
-    try {
-      const { eventId } = this.props.match.params;
+  componentWillUnmount() {
+    this.categoriesSubscription();
+    this.attendeesSubscription();
+  }
 
-      const [a, b] = await Promise.all([
-        firebase
-          .firestore()
-          .collection('events')
-          .doc(eventId)
-          .collection('categories')
-          .get(),
-        firebase
-          .firestore()
-          .collection('events')
-          .doc(eventId)
-          .collection('attendees')
-          .get(),
-      ]);
+  updateCategories = (snapshot: firebase.firestore.QuerySnapshot) => {
+    const categories = snapshot.docs.map(
+      a =>
+        ({
+          id: a.id,
+          ...a.data(),
+        } as Category)
+    );
 
-      const categories = a.docs.map(
-        a =>
-          ({
-            id: a.id,
-            ...a.data(),
-          } as Category)
-      );
+    this.setState(({ fetched }) => ({
+      categories,
+      fetched: fetched + 1,
+    }));
+  };
 
-      const attendees = b.docs.map(
-        a =>
-          ({
-            id: a.id,
-            ...a.data(),
-          } as Attendee)
-      );
+  updateAttendees = (snapshot: firebase.firestore.QuerySnapshot) => {
+    const attendees = snapshot.docs.map(
+      a =>
+        ({
+          id: a.id,
+          ...a.data(),
+        } as Attendee)
+    );
 
-      this.setState({
-        categories,
-        attendees,
-        filteredAttendees: attendees,
-        fetching: false,
-      });
-    } catch (error) {
-      this.setState({ fetching: false });
-      console.error(error);
-    }
+    this.setState(({ fetched }) => ({
+      attendees,
+      filteredAttendees: attendees,
+      fetched: fetched + 1,
+    }));
   };
 
   submitHandler = (event: React.SyntheticEvent) => {
@@ -141,13 +147,10 @@ class Attendees extends React.Component<Props, State> {
         .collection('attendees')
         .add(attendee);
 
-      this.props.form.setFields({ name: '' });
-
-      await this.getData();
-
-      this.setState({ loading: false });
-
       message.success(`Attendee "${name}" in "${category.name}" added.`, 3);
+
+      this.props.form.setFields({ name: '' });
+      this.setState({ loading: false });
     } catch (error) {
       console.error(error);
       this.setState({ loading: false });
@@ -173,7 +176,7 @@ class Attendees extends React.Component<Props, State> {
   render() {
     const {
       loading,
-      fetching,
+      fetched,
       categories,
       filteredAttendees,
       attendees,
@@ -181,7 +184,7 @@ class Attendees extends React.Component<Props, State> {
     } = this.state;
     const { getFieldDecorator } = this.props.form;
 
-    if (fetching) {
+    if (fetched < 2) {
       return <Loading />;
     }
 
