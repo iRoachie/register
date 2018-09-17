@@ -22,7 +22,7 @@ interface State {
   loading: boolean;
   search: string;
   categories: Category[];
-  filteredAttendees: Category[];
+  filteredAttendees: Attendee[];
   attendees: Attendee[];
 }
 
