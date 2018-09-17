@@ -46,6 +46,7 @@ export default class Register extends React.Component<Props, State> {
       .collection('events')
       .doc(eventId)
       .collection('attendees')
+      .orderBy('createdAt', 'desc')
       .onSnapshot(this.updateAttendees, console.error);
 
     this.categoriesSubscription = firebase
@@ -53,6 +54,7 @@ export default class Register extends React.Component<Props, State> {
       .collection('events')
       .doc(eventId)
       .collection('categories')
+      .orderBy('createdAt', 'desc')
       .onSnapshot(this.updateCategories, console.error);
   }
 

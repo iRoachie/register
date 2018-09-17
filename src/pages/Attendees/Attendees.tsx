@@ -63,6 +63,7 @@ class Attendees extends React.Component<Props, State> {
       .collection('events')
       .doc(eventId)
       .collection('categories')
+      .orderBy('createdAt', 'desc')
       .onSnapshot(this.updateCategories, console.error);
 
     this.attendeesSubscription = firebase
@@ -70,6 +71,7 @@ class Attendees extends React.Component<Props, State> {
       .collection('events')
       .doc(eventId)
       .collection('attendees')
+      .orderBy('createdAt', 'desc')
       .onSnapshot(this.updateAttendees, console.error);
   }
 
@@ -144,6 +146,7 @@ class Attendees extends React.Component<Props, State> {
         name,
         category,
         present: false,
+        createdAt: Date.now(),
       };
 
       await firebase

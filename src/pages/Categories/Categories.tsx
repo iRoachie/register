@@ -40,6 +40,7 @@ class Categories extends React.Component<Props, State> {
       .collection('events')
       .doc(eventId)
       .collection('categories')
+      .orderBy('createdAt', 'desc')
       .onSnapshot(this.updateCategories, console.error);
   }
 
@@ -90,7 +91,7 @@ class Categories extends React.Component<Props, State> {
         .collection('events')
         .doc(eventId)
         .collection('categories')
-        .add({ name: category });
+        .add({ name: category, createdAt: Date.now() });
 
       message.success(`Category "${category}" created.`, 3);
 
