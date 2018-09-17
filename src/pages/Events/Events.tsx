@@ -33,6 +33,7 @@ class Events extends React.Component<RouteComponentProps, State> {
       const { docs: events } = await firebase
         .firestore()
         .collection('events')
+        .orderBy('createdAt', 'desc')
         .get();
 
       this.setState({
