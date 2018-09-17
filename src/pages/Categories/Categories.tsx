@@ -40,7 +40,7 @@ class Categories extends React.Component<Props, State> {
       .collection('events')
       .doc(eventId)
       .collection('categories')
-      .onSnapshot(this.updateCategories);
+      .onSnapshot(this.updateCategories, console.error);
   }
 
   componentWillUnmount() {

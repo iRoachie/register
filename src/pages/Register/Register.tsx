@@ -46,14 +46,14 @@ export default class Register extends React.Component<Props, State> {
       .collection('events')
       .doc(eventId)
       .collection('attendees')
-      .onSnapshot(this.updateAttendees);
+      .onSnapshot(this.updateAttendees, console.error);
 
     this.categoriesSubscription = firebase
       .firestore()
       .collection('events')
       .doc(eventId)
       .collection('categories')
-      .onSnapshot(this.updateCategories);
+      .onSnapshot(this.updateCategories, console.error);
   }
 
   componentWillUnmount() {

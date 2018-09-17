@@ -57,14 +57,14 @@ class Attendees extends React.Component<Props, State> {
       .collection('events')
       .doc(eventId)
       .collection('categories')
-      .onSnapshot(this.updateCategories);
+      .onSnapshot(this.updateCategories, console.error);
 
     this.attendeesSubscription = firebase
       .firestore()
       .collection('events')
       .doc(eventId)
       .collection('attendees')
-      .onSnapshot(this.updateAttendees);
+      .onSnapshot(this.updateAttendees, console.error);
   }
 
   componentWillUnmount() {
