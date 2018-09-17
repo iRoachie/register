@@ -3,7 +3,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Card, Input, Icon, Checkbox, List } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
-import { Wrapper, Loading } from 'components';
+import { Wrapper, Loading, AttendeesList } from 'components';
 import { Category, Attendee } from 'utils';
 import { firebase } from 'config';
 import styled from '@styled';
@@ -161,24 +161,26 @@ export default class Register extends React.Component<Props, State> {
           onChange={this.updateSearch}
         />
 
-        <List
-          dataSource={filteredAttendees}
-          renderItem={(a: Attendee) => (
-            <List.Item>
-              <List.Item.Meta
-                avatar={
-                  <AttendeeCheckbox
-                    name={a.id}
-                    checked={a.present}
-                    onChange={this.toggleChecked}
-                  />
-                }
-                title={a.name}
-                description={a.category.name}
-              />
-            </List.Item>
-          )}
-        />
+        <AttendeesList>
+          <List
+            dataSource={filteredAttendees}
+            renderItem={(a: Attendee) => (
+              <List.Item>
+                <List.Item.Meta
+                  avatar={
+                    <AttendeeCheckbox
+                      name={a.id}
+                      checked={a.present}
+                      onChange={this.toggleChecked}
+                    />
+                  }
+                  title={a.name}
+                  description={a.category.name}
+                />
+              </List.Item>
+            )}
+          />
+        </AttendeesList>
       </RegisterWrapper>
     );
   }

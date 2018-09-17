@@ -1,5 +1,11 @@
 import React from 'react';
-import { Wrapper, Loading, Section, EmptyData } from 'components';
+import {
+  Wrapper,
+  Loading,
+  Section,
+  EmptyData,
+  AttendeesList,
+} from 'components';
 import { firebase } from 'config';
 import { Attendee, Category } from 'utils';
 import styled from '@styled';
@@ -294,13 +300,6 @@ const Container = styled.div`
 // @ts-ignore
 const Search = styled(Input)`
   margin-bottom: 20px;
-`;
-
-const AttendeesList = styled.div`
-  border-top: ${({ theme }) => theme.border};
-  padding-top: 20px;
-  max-height: 400px;
-  overflow-y: scroll;
 `;
 
 export default Form.create()(Attendees);
