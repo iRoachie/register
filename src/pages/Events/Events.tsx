@@ -100,23 +100,25 @@ class Events extends React.Component<RouteComponentProps, State> {
   render() {
     return (
       <Container>
-        <Wrapper>
-          <Header
-            title="Events"
-            titleLink="/"
-            headerRight={() => (
-              <Route
-                exact
-                path="/"
-                component={() => (
-                  <Button type="primary" onClick={this.newEvent}>
-                    New Event
-                  </Button>
-                )}
-              />
-            )}
-          />
+        <Header
+          title="Events"
+          titleLink="/"
+          fixed
+          insetFlow
+          headerRight={() => (
+            <Route
+              exact
+              path="/"
+              component={() => (
+                <Button type="primary" onClick={this.newEvent}>
+                  New Event
+                </Button>
+              )}
+            />
+          )}
+        />
 
+        <Wrapper header>
           <Switch>
             <Route exact path="/events/new" component={NewEvent} />
             <Route component={this.renderContent} />
