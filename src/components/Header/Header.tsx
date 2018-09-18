@@ -6,7 +6,17 @@ import { firebase } from 'config';
 interface Props {
   title?: string;
   titleLink?: string;
+  /**
+   * Offset the left for the sidebar
+   */
   inset?: boolean;
+  /**
+   * Offset both sides to fit in the max-width wrapper
+   */
+  insetFlow?: boolean;
+  /**
+   * Fixed header to the top
+   */
   fixed?: boolean;
   headerRight?(): React.ReactElement<any> | null;
 }
@@ -17,10 +27,17 @@ class Header extends React.Component<Props> {
   };
 
   render() {
-    const { title, titleLink, headerRight, inset, fixed } = this.props;
+    const {
+      title,
+      titleLink,
+      headerRight,
+      inset,
+      fixed,
+      insetFlow,
+    } = this.props;
 
     return (
-      <Content inset={inset} fixed={fixed}>
+      <Content inset={inset} fixed={fixed} insetFlow={insetFlow}>
         <Title href={titleLink}>
           <h1>{title}</h1>
         </Title>
@@ -53,9 +70,19 @@ const Content = styled.header`
   background: #fff;
   z-index: 2;
   align-items: center;
-  padding: ${(props: Partial<Props>) => (props.inset ? '0 15px' : 0)};
+  padding: ${(props: Partial<Props>) => (props.inset ? '0 20px' : 0)};
   position: ${({ fixed }) => (fixed ? 'fixed' : 'static')};
   left: ${({ inset, theme }) => (inset ? theme.sidebarWidth : 0)};
+  top: 0;
+
+  ${({ insetFlow }) =>
+    insetFlow &&
+    `
+    max-width: 1040px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+  `};
 `;
 
 const HeaderRight = styled.div`
