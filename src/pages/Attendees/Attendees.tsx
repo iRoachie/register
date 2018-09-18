@@ -23,6 +23,8 @@ import {
 import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
 
+import AttendeeEdit from './components/AtttendeeEdit';
+
 interface State {
   fetched: number;
   loading: boolean;
@@ -30,6 +32,7 @@ interface State {
   categories: Category[];
   filteredAttendees: Attendee[];
   attendees: Attendee[];
+  editing: { id: string; updating: boolean }[];
 }
 
 interface Params {
@@ -52,6 +55,7 @@ class Attendees extends React.Component<Props, State> {
       filteredAttendees: [],
       attendees: [],
       search: '',
+      editing: [],
     };
   }
 
@@ -182,6 +186,42 @@ class Attendees extends React.Component<Props, State> {
     }));
   };
 
+  toggleAttendeeEdit = (attendeeId: string) => {
+    this.setState(({ editing }) => ({
+      editing: editing.find(a => a.id === attendeeId)
+        ? editing.filter(a => a.id !== attendeeId)
+        : [...editing, { id: attendeeId, updating: false }],
+    }));
+  };
+
+  updateAttendee = (attendee: Attendee) => {
+    this.setState(
+      ({ editing }) => ({
+        editing: editing.map(
+          a => (a.id === attendee.id ? { ...a, updating: true } : a)
+        ),
+      }),
+      async () => {
+        const { eventId } = this.props.match.params;
+
+        try {
+          await firebase
+            .firestore()
+            .collection('events')
+            .doc(eventId)
+            .collection('attendees')
+            .doc(attendee.id)
+            .update(attendee);
+
+          message.success(`Attendee "${attendee.name}" updated.`, 3);
+          this.toggleAttendeeEdit(attendee.id);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    );
+  };
+
   render() {
     const {
       loading,
@@ -190,6 +230,7 @@ class Attendees extends React.Component<Props, State> {
       filteredAttendees,
       attendees,
       search,
+      editing,
     } = this.state;
     const { getFieldDecorator } = this.props.form;
 
@@ -277,14 +318,32 @@ class Attendees extends React.Component<Props, State> {
                 <AttendeesList>
                   <List
                     dataSource={filteredAttendees}
-                    renderItem={(a: Attendee) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          title={a.name}
-                          description={a.category.name}
+                    renderItem={(attendee: Attendee) =>
+                      editing.some(a => a.id === attendee.id) ? (
+                        <AttendeeEdit
+                          attendee={attendee}
+                          categories={categories}
+                          cancelEditing={this.toggleAttendeeEdit}
+                          updating={editing.some(
+                            a => a.updating && a.id === attendee.id
+                          )}
+                          updateAttendee={this.updateAttendee}
                         />
-                      </List.Item>
-                    )}
+                      ) : (
+                        <List.Item>
+                          <List.Item.Meta
+                            title={attendee.name}
+                            description={attendee.category.name}
+                          />
+                          <Button
+                            type="dashed"
+                            onClick={() => this.toggleAttendeeEdit(attendee.id)}
+                          >
+                            Edit
+                          </Button>
+                        </List.Item>
+                      )
+                    }
                   />
                 </AttendeesList>
               </Card>
