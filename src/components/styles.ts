@@ -4,7 +4,7 @@ export const Wrapper = styled.div`
   max-width: 1080px;
   margin: 0 auto;
   width: 100%;
-  padding: 0 16px;
+  padding: 0 20px;
 `;
 
 export const Hr = styled.hr`
