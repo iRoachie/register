@@ -20,6 +20,7 @@ interface State {
 
 class Events extends React.Component<RouteComponentProps, State> {
   eventsSubscription: () => void;
+
   constructor(props: RouteComponentProps) {
     super(props);
 

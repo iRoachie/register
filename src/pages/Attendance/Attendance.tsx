@@ -23,7 +23,7 @@ interface Params {
 
 type Props = RouteComponentProps<Params>;
 
-export default class Register extends React.Component<Props, State> {
+export default class Attendance extends React.Component<Props, State> {
   attendeesSubscription: () => void;
   categoriesSubscription: () => void;
 

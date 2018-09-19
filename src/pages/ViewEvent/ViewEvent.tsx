@@ -8,7 +8,7 @@ import { firebase } from 'config';
 import { Icon } from 'antd';
 import Categories from '../Categories';
 import Attendees from '../Attendees';
-import Register from '../Register';
+import Attendance from '../Attendance';
 import DocumentTitle from 'react-document-title';
 
 interface Params {
@@ -63,8 +63,8 @@ class ViewEvent extends React.Component<Props, State> {
       return (
         <Container>
           <Sidebar>
-            <MenuLink to={`${baseURL}/register`}>
-              <Icon type="solution" theme="outlined" /> Register
+            <MenuLink to={`${baseURL}/attendance`}>
+              <Icon type="solution" theme="outlined" /> Attendance
             </MenuLink>
             <MenuLink to={`${baseURL}/categories`}>
               <Icon type="tag" theme="outlined" /> Categories
@@ -91,8 +91,8 @@ class ViewEvent extends React.Component<Props, State> {
                 />
                 <Route
                   exact
-                  path="/events/:eventId/register"
-                  component={Register}
+                  path="/events/:eventId/attendance"
+                  component={Attendance}
                 />
               </Switch>
             </ContentWrapper>
