@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from '@styled';
 import { RouteComponentProps, Switch, Route, Link } from 'react-router-dom';
-import { firebase } from 'config';
-import { Card, Button, Input, List, Icon } from 'antd';
+import { firebase, Theme } from 'config';
+import { Card, Button, Input, List, Icon, Popconfirm, message } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
 
 import { Header, Loading, Wrapper, EmptyData } from 'components';
@@ -14,9 +14,11 @@ interface State {
   loading: boolean;
   events: IEvent[];
   filteredEvents: IEvent[];
+  disabled: string; // Disabled event
 }
 
 class Events extends React.Component<RouteComponentProps, State> {
+  eventsSubscription: () => void;
   constructor(props: RouteComponentProps) {
     super(props);
 
@@ -25,38 +27,38 @@ class Events extends React.Component<RouteComponentProps, State> {
       loading: true,
       events: [],
       filteredEvents: [],
+      disabled: '',
     };
   }
 
   componentDidMount() {
-    this.getEvents();
+    this.eventsSubscription = firebase
+      .firestore()
+      .collection('events')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(this.updateEvents);
+
+    document.body.style.height = 'auto';
   }
 
-  getEvents = async () => {
-    try {
-      const { docs } = await firebase
-        .firestore()
-        .collection('events')
-        .orderBy('createdAt', 'desc')
-        .get();
+  componentWillUnmount() {
+    this.eventsSubscription();
+  }
 
-      const events = docs.map(
-        a =>
-          ({
-            id: a.id,
-            ...a.data(),
-          } as IEvent)
-      );
+  updateEvents = (snapshot: firebase.firestore.QuerySnapshot) => {
+    const events = snapshot.docs.map(
+      a =>
+        ({
+          id: a.id,
+          ...a.data(),
+        } as IEvent)
+    );
 
-      this.setState({
-        events,
-        filteredEvents: events,
-        loading: false,
-      });
-    } catch (error) {
-      console.log(error);
-      this.setState({ loading: false });
-    }
+    this.setState({
+      events,
+      filteredEvents: events,
+      loading: false,
+    });
   };
 
   newEvent = () => {
@@ -74,8 +76,26 @@ class Events extends React.Component<RouteComponentProps, State> {
     this.setState({ filteredEvents, search });
   };
 
+  deleteEvent = async (event: IEvent) => {
+    this.setState({ disabled: event.id });
+
+    try {
+      await firebase
+        .firestore()
+        .collection('events')
+        .doc(event.id)
+        .delete();
+
+      message.success(`Event "${event.name}" deleted`, 3, () => {
+        this.setState({ disabled: '' });
+      });
+    } catch (event) {
+      console.error(event);
+    }
+  };
+
   renderContent = () => {
-    const { loading, events, search, filteredEvents } = this.state;
+    const { loading, events, search, filteredEvents, disabled } = this.state;
 
     if (loading) {
       return <Loading />;
@@ -106,19 +126,46 @@ class Events extends React.Component<RouteComponentProps, State> {
 
         <List
           dataSource={filteredEvents}
-          renderItem={(a: IEvent) => (
-            <Link to={`/events/${a.id}`} key={a.id}>
-              <EventCard>
-                <Card.Meta
-                  title={a.name}
-                  description={`Created ${distanceInWordsToNow(
-                    new Date(a.createdAt),
-                    { addSuffix: true }
-                  )}`}
-                />
+          renderItem={(a: IEvent) => {
+            const isDisabled = a.id === disabled;
+
+            return (
+              <EventCard
+                key={a.id}
+                actions={[
+                  <Popconfirm
+                    key="delete"
+                    title="Are you sure want to delete this event?"
+                    onConfirm={() => this.deleteEvent(a)}
+                    okText="Yes"
+                    cancelText="No"
+                    okType="danger"
+                  >
+                    <Button disabled={isDisabled} loading={isDisabled}>
+                      {!isDisabled && (
+                        <Icon
+                          type="delete"
+                          theme="twoTone"
+                          twoToneColor={Theme.colors.error}
+                        />
+                      )}
+                      Delete
+                    </Button>
+                  </Popconfirm>,
+                ]}
+              >
+                <Link to={isDisabled ? '' : `/events/${a.id}`}>
+                  <Card.Meta
+                    title={a.name}
+                    description={`Created ${distanceInWordsToNow(
+                      new Date(a.createdAt),
+                      { addSuffix: true }
+                    )}`}
+                  />
+                </Link>
               </EventCard>
-            </Link>
-          )}
+            );
+          }}
         />
       </main>
     );
@@ -126,7 +173,7 @@ class Events extends React.Component<RouteComponentProps, State> {
 
   render() {
     return (
-      <Container>
+      <React.Fragment>
         <Header
           title="Events"
           titleLink="/"
@@ -151,14 +198,10 @@ class Events extends React.Component<RouteComponentProps, State> {
             <Route component={this.renderContent} />
           </Switch>
         </Wrapper>
-      </Container>
+      </React.Fragment>
     );
   }
 }
-
-const Container = styled.div`
-  min-height: 100vh;
-`;
 
 const EventCard = styled(Card)`
   margin-bottom: 15px;
