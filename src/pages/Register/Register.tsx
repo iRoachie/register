@@ -4,9 +4,10 @@ import { Card, Input, Icon, Checkbox, List } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
 import { Wrapper, Loading, AttendeesList, EmptyData } from 'components';
-import { Category, Attendee } from 'utils';
+import { Category, Attendee, pageTitle } from 'utils';
 import { firebase } from 'config';
 import styled from '@styled';
+import DocumentTitle from 'react-document-title';
 
 interface State {
   search: string;
@@ -143,54 +144,60 @@ export default class Register extends React.Component<Props, State> {
     const { fetched, categories, search, filteredAttendees } = this.state;
 
     if (fetched < 2) {
-      return <Loading />;
+      return (
+        <DocumentTitle title={pageTitle('Loading...')}>
+          <Loading />
+        </DocumentTitle>
+      );
     }
 
     return (
-      <RegisterWrapper>
-        {categories.length === 0 ? (
-          <EmptyData
-            title="No Tallies as Yet"
-            description="Add Attendees to see the tallies here"
-          />
-        ) : (
-          <Items>
-            {categories.map(a => (
-              <Score key={a.id}>
-                <Card.Meta title={`${a.present}`} description={a.name} />
-              </Score>
-            ))}
-          </Items>
-        )}
+      <DocumentTitle title={pageTitle('Attendance')}>
+        <RegisterWrapper>
+          {categories.length === 0 ? (
+            <EmptyData
+              title="No Tallies as Yet"
+              description="Add Attendees to see the tallies here"
+            />
+          ) : (
+            <Items>
+              {categories.map(a => (
+                <Score key={a.id}>
+                  <Card.Meta title={`${a.present}`} description={a.name} />
+                </Score>
+              ))}
+            </Items>
+          )}
 
-        <Search
-          placeholder="Search attendees"
-          prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
-          value={search}
-          onChange={this.updateSearch}
-        />
-
-        <AttendeesList>
-          <List
-            dataSource={filteredAttendees}
-            renderItem={(a: Attendee) => (
-              <List.Item>
-                <List.Item.Meta
-                  avatar={
-                    <AttendeeCheckbox
-                      name={a.id}
-                      checked={a.present}
-                      onChange={this.toggleChecked}
-                    />
-                  }
-                  title={a.name}
-                  description={a.category.name}
-                />
-              </List.Item>
-            )}
+          <Search
+            placeholder="Search attendees"
+            prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
+            value={search}
+            onChange={this.updateSearch}
           />
-        </AttendeesList>
-      </RegisterWrapper>
+
+          <AttendeesList>
+            <List
+              dataSource={filteredAttendees}
+              renderItem={(a: Attendee) => (
+                <List.Item>
+                  <List.Item.Meta
+                    avatar={
+                      <AttendeeCheckbox
+                        name={a.id}
+                        checked={a.present}
+                        onChange={this.toggleChecked}
+                      />
+                    }
+                    title={a.name}
+                    description={a.category.name}
+                  />
+                </List.Item>
+              )}
+            />
+          </AttendeesList>
+        </RegisterWrapper>
+      </DocumentTitle>
     );
   }
 }

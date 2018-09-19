@@ -5,6 +5,8 @@ import { FormComponentProps } from 'antd/lib/form';
 import { firebase } from 'config';
 
 import styled from '@styled';
+import DocumentTitle from 'react-document-title';
+import { pageTitle } from 'utils';
 
 interface State {
   loading: boolean;
@@ -53,30 +55,37 @@ class NewEvent extends React.Component<Props, State> {
     const { getFieldDecorator } = this.props.form!;
 
     return (
-      <Content>
-        <Title>Create New Event</Title>
+      <DocumentTitle title={pageTitle('New Event')}>
+        <Content>
+          <Title>Create New Event</Title>
 
-        <Form onSubmit={this.submitHander}>
-          <Form.Item>
-            {getFieldDecorator('name', {
-              rules: [{ required: true, message: 'Please input event name!' }],
-            })(
-              <Input
-                type="text"
-                disabled={loading}
-                prefix={
-                  <Icon type="calendar" style={{ color: 'rgba(0,0,0,.25)' }} />
-                }
-                placeholder="Event Name"
-              />
-            )}
-          </Form.Item>
+          <Form onSubmit={this.submitHander}>
+            <Form.Item>
+              {getFieldDecorator('name', {
+                rules: [
+                  { required: true, message: 'Please input event name!' },
+                ],
+              })(
+                <Input
+                  type="text"
+                  disabled={loading}
+                  prefix={
+                    <Icon
+                      type="calendar"
+                      style={{ color: 'rgba(0,0,0,.25)' }}
+                    />
+                  }
+                  placeholder="Event Name"
+                />
+              )}
+            </Form.Item>
 
-          <Button htmlType="submit" type="primary" loading={loading}>
-            Create Event
-          </Button>
-        </Form>
-      </Content>
+            <Button htmlType="submit" type="primary" loading={loading}>
+              Create Event
+            </Button>
+          </Form>
+        </Content>
+      </DocumentTitle>
     );
   }
 }

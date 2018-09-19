@@ -3,9 +3,11 @@ import styled from '@styled';
 import { RouteComponentProps } from 'react-router';
 import { Button, Card, Input, Form, Icon } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
+import DocumentTitle from 'react-document-title';
 
 import { Loading } from 'components';
 import { firebase } from 'config';
+import { pageTitle } from 'utils';
 
 const FormItem = Form.Item;
 
@@ -70,57 +72,72 @@ class Login extends React.Component<
   render() {
     const { getFieldDecorator } = this.props.form!;
     const { loading, error, checkingAuth } = this.state;
+    return (
+      <DocumentTitle title={pageTitle('Login')}>
+        {checkingAuth ? (
+          <Loading />
+        ) : (
+          <Container>
+            <Box>
+              <h1>Login</h1>
 
-    return checkingAuth ? (
-      <Loading />
-    ) : (
-      <Container>
-        <Box>
-          <h1>Login</h1>
+              <Form onSubmit={this.handleSubmit}>
+                <FormItem>
+                  {getFieldDecorator('email', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input your username!',
+                      },
+                    ],
+                  })(
+                    <Input
+                      type="email"
+                      disabled={loading}
+                      prefix={
+                        <Icon
+                          type="mail"
+                          style={{ color: 'rgba(0,0,0,.25)' }}
+                        />
+                      }
+                      placeholder="Email Address"
+                    />
+                  )}
+                </FormItem>
 
-          <Form onSubmit={this.handleSubmit}>
-            <FormItem>
-              {getFieldDecorator('email', {
-                rules: [
-                  { required: true, message: 'Please input your username!' },
-                ],
-              })(
-                <Input
-                  type="email"
-                  disabled={loading}
-                  prefix={
-                    <Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />
-                  }
-                  placeholder="Email Address"
-                />
-              )}
-            </FormItem>
+                <FormItem>
+                  {getFieldDecorator('password', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input your password!',
+                      },
+                    ],
+                  })(
+                    <Input
+                      type="password"
+                      disabled={loading}
+                      prefix={
+                        <Icon
+                          type="lock"
+                          style={{ color: 'rgba(0,0,0,.25)' }}
+                        />
+                      }
+                      placeholder="Password"
+                    />
+                  )}
+                </FormItem>
 
-            <FormItem>
-              {getFieldDecorator('password', {
-                rules: [
-                  { required: true, message: 'Please input your password!' },
-                ],
-              })(
-                <Input
-                  type="password"
-                  disabled={loading}
-                  prefix={
-                    <Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />
-                  }
-                  placeholder="Password"
-                />
-              )}
-            </FormItem>
+                <Error>{error}</Error>
 
-            <Error>{error}</Error>
-
-            <LoginButton htmlType="submit" type="primary" loading={loading}>
-              Log in
-            </LoginButton>
-          </Form>
-        </Box>
-      </Container>
+                <LoginButton htmlType="submit" type="primary" loading={loading}>
+                  Log in
+                </LoginButton>
+              </Form>
+            </Box>
+          </Container>
+        )}
+      </DocumentTitle>
     );
   }
 }

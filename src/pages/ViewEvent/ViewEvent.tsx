@@ -2,13 +2,14 @@ import React from 'react';
 import { RouteComponentProps, NavLink, Switch, Route } from 'react-router-dom';
 import styled from '@styled';
 import { Sidebar, Header, Loading } from 'components';
-import { IEvent } from 'utils';
+import { IEvent, pageTitle } from 'utils';
 import { firebase } from 'config';
 
 import { Icon } from 'antd';
 import Categories from '../Categories';
 import Attendees from '../Attendees';
 import Register from '../Register';
+import DocumentTitle from 'react-document-title';
 
 interface Params {
   eventId: string;
@@ -100,7 +101,11 @@ class ViewEvent extends React.Component<Props, State> {
       );
     }
 
-    return <Loading />;
+    return (
+      <DocumentTitle title={pageTitle('Loading...')}>
+        <Loading />
+      </DocumentTitle>
+    );
   }
 }
 

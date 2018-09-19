@@ -1,11 +1,12 @@
 import React from 'react';
 import { Wrapper, Loading, Section, EmptyData } from 'components';
 import { firebase } from 'config';
-import { Category } from 'utils';
+import { Category, pageTitle } from 'utils';
 import styled from '@styled';
 import { Form, Input, Icon, Button, message, Tag } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
+import DocumentTitle from 'react-document-title';
 
 interface State {
   fetching: boolean;
@@ -107,60 +108,66 @@ class Categories extends React.Component<Props, State> {
     const { getFieldDecorator } = this.props.form;
 
     if (fetching) {
-      return <Loading />;
+      return (
+        <DocumentTitle title={pageTitle('Loading...')}>
+          <Loading />
+        </DocumentTitle>
+      );
     }
 
     return (
-      <Container>
-        <Wrapper>
-          <Section
-            title="New Category"
-            description="Add a new category to group attendees by."
-          >
-            <CategoryForm onSubmit={this.submitHandler} layout="inline">
-              <Form.Item>
-                {getFieldDecorator('category', {
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please input category name!',
-                    },
-                  ],
-                })(
-                  <Input
-                    type="text"
-                    disabled={loading}
-                    prefix={
-                      <Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />
-                    }
-                    placeholder="Category"
-                  />
-                )}
-              </Form.Item>
+      <DocumentTitle title={pageTitle('Categories')}>
+        <Container>
+          <Wrapper>
+            <Section
+              title="New Category"
+              description="Add a new category to group attendees by."
+            >
+              <CategoryForm onSubmit={this.submitHandler} layout="inline">
+                <Form.Item>
+                  {getFieldDecorator('category', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input category name!',
+                      },
+                    ],
+                  })(
+                    <Input
+                      type="text"
+                      disabled={loading}
+                      prefix={
+                        <Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />
+                      }
+                      placeholder="Category"
+                    />
+                  )}
+                </Form.Item>
 
-              <Button htmlType="submit" type="primary" loading={loading}>
-                Add Category
-              </Button>
-            </CategoryForm>
-          </Section>
+                <Button htmlType="submit" type="primary" loading={loading}>
+                  Add Category
+                </Button>
+              </CategoryForm>
+            </Section>
 
-          <Section
-            title="Categories"
-            description="List of all categories for this event."
-          >
-            {categories.length === 0 ? (
-              <EmptyData
-                title="No Categories Added as Yet"
-                description="Fortunately, it’s very easy to create one."
-              />
-            ) : (
-              categories.map(a => (
-                <CategoryTag key={a.id}>{a.name}</CategoryTag>
-              ))
-            )}
-          </Section>
-        </Wrapper>
-      </Container>
+            <Section
+              title="Categories"
+              description="List of all categories for this event."
+            >
+              {categories.length === 0 ? (
+                <EmptyData
+                  title="No Categories Added as Yet"
+                  description="Fortunately, it’s very easy to create one."
+                />
+              ) : (
+                categories.map(a => (
+                  <CategoryTag key={a.id}>{a.name}</CategoryTag>
+                ))
+              )}
+            </Section>
+          </Wrapper>
+        </Container>
+      </DocumentTitle>
     );
   }
 }

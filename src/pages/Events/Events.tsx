@@ -6,8 +6,9 @@ import { Card, Button, Input, List, Icon, Popconfirm, message } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
 
 import { Header, Loading, Wrapper, EmptyData } from 'components';
-import { IEvent } from 'utils';
+import { IEvent, pageTitle } from 'utils';
 import NewEvent from './components/NewEvent';
+import DocumentTitle from 'react-document-title';
 
 interface State {
   search: string;
@@ -173,32 +174,34 @@ class Events extends React.Component<RouteComponentProps, State> {
 
   render() {
     return (
-      <React.Fragment>
-        <Header
-          title="Events"
-          titleLink="/"
-          fixed
-          insetFlow
-          headerRight={() => (
-            <Route
-              exact
-              path="/"
-              component={() => (
-                <Button type="primary" onClick={this.newEvent}>
-                  New Event
-                </Button>
-              )}
-            />
-          )}
-        />
+      <DocumentTitle title={pageTitle('Events')}>
+        <React.Fragment>
+          <Header
+            title="Events"
+            titleLink="/"
+            fixed
+            insetFlow
+            headerRight={() => (
+              <Route
+                exact
+                path="/"
+                component={() => (
+                  <Button type="primary" onClick={this.newEvent}>
+                    New Event
+                  </Button>
+                )}
+              />
+            )}
+          />
 
-        <Wrapper header>
-          <Switch>
-            <Route exact path="/events/new" component={NewEvent} />
-            <Route component={this.renderContent} />
-          </Switch>
-        </Wrapper>
-      </React.Fragment>
+          <Wrapper header>
+            <Switch>
+              <Route exact path="/events/new" component={NewEvent} />
+              <Route component={this.renderContent} />
+            </Switch>
+          </Wrapper>
+        </React.Fragment>
+      </DocumentTitle>
     );
   }
 }

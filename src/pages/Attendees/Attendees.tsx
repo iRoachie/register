@@ -7,7 +7,7 @@ import {
   AttendeesList,
 } from 'components';
 import { firebase } from 'config';
-import { Attendee, Category } from 'utils';
+import { Attendee, Category, pageTitle } from 'utils';
 import styled from '@styled';
 import {
   Form,
@@ -24,6 +24,7 @@ import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
 
 import AttendeeEdit from './components/AtttendeeEdit';
+import DocumentTitle from 'react-document-title';
 
 interface State {
   fetched: number;
@@ -235,122 +236,136 @@ class Attendees extends React.Component<Props, State> {
     const { getFieldDecorator } = this.props.form;
 
     if (fetched < 2) {
-      return <Loading />;
+      return (
+        <DocumentTitle title={pageTitle('Loading...')}>
+          <Loading />
+        </DocumentTitle>
+      );
     }
 
     return (
-      <Container>
-        <Wrapper>
-          <Section
-            title="New Attendee"
-            description="Add a new attendee for this event."
-          >
-            <Form onSubmit={this.submitHandler}>
-              <Form.Item>
-                {getFieldDecorator('name', {
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please input attendee name!',
-                    },
-                  ],
-                })(
-                  <Input
-                    type="text"
-                    disabled={loading}
-                    prefix={
-                      <Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />
-                    }
-                    placeholder="Attendee Name"
-                  />
-                )}
-              </Form.Item>
-
-              <Form.Item>
-                {getFieldDecorator('category', {
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please select a category',
-                    },
-                  ],
-                })(
-                  <Select disabled={loading} placeholder="Category">
-                    {categories.map(a => (
-                      <Select.Option value={a.id} key={a.id}>
-                        {a.name}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-
-              <Button htmlType="submit" type="primary" loading={loading}>
-                Add Attendee
-              </Button>
-            </Form>
-          </Section>
-
-          <Section
-            title={
-              <h3>
-                Attendees <Badge count={attendees.length} />
-              </h3>
-            }
-            description="List of all attendees invited to this event."
-          >
-            {attendees.length === 0 ? (
-              <EmptyData
-                title="No Attendees Added as Yet"
-                description="Fortunately, it’s very easy to create one."
-              />
-            ) : (
-              <Card>
-                <Search
-                  placeholder="Search attendees"
-                  prefix={
-                    <Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />
-                  }
-                  value={search}
-                  onChange={this.updateSearch}
-                />
-
-                <AttendeesList>
-                  <List
-                    dataSource={filteredAttendees}
-                    renderItem={(attendee: Attendee) =>
-                      editing.some(a => a.id === attendee.id) ? (
-                        <AttendeeEdit
-                          attendee={attendee}
-                          categories={categories}
-                          cancelEditing={this.toggleAttendeeEdit}
-                          updating={editing.some(
-                            a => a.updating && a.id === attendee.id
-                          )}
-                          updateAttendee={this.updateAttendee}
+      <DocumentTitle title={pageTitle('Attendees')}>
+        <Container>
+          <Wrapper>
+            <Section
+              title="New Attendee"
+              description="Add a new attendee for this event."
+            >
+              <Form onSubmit={this.submitHandler}>
+                <Form.Item>
+                  {getFieldDecorator('name', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input attendee name!',
+                      },
+                    ],
+                  })(
+                    <Input
+                      type="text"
+                      disabled={loading}
+                      prefix={
+                        <Icon
+                          type="user"
+                          style={{ color: 'rgba(0,0,0,.25)' }}
                         />
-                      ) : (
-                        <List.Item>
-                          <List.Item.Meta
-                            title={attendee.name}
-                            description={attendee.category.name}
-                          />
-                          <Button
-                            type="dashed"
-                            onClick={() => this.toggleAttendeeEdit(attendee.id)}
-                          >
-                            Edit
-                          </Button>
-                        </List.Item>
-                      )
+                      }
+                      placeholder="Attendee Name"
+                    />
+                  )}
+                </Form.Item>
+
+                <Form.Item>
+                  {getFieldDecorator('category', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please select a category',
+                      },
+                    ],
+                  })(
+                    <Select disabled={loading} placeholder="Category">
+                      {categories.map(a => (
+                        <Select.Option value={a.id} key={a.id}>
+                          {a.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  )}
+                </Form.Item>
+
+                <Button htmlType="submit" type="primary" loading={loading}>
+                  Add Attendee
+                </Button>
+              </Form>
+            </Section>
+
+            <Section
+              title={
+                <h3>
+                  Attendees <Badge count={attendees.length} />
+                </h3>
+              }
+              description="List of all attendees invited to this event."
+            >
+              {attendees.length === 0 ? (
+                <EmptyData
+                  title="No Attendees Added as Yet"
+                  description="Fortunately, it’s very easy to create one."
+                />
+              ) : (
+                <Card>
+                  <Search
+                    placeholder="Search attendees"
+                    prefix={
+                      <Icon
+                        type="search"
+                        style={{ color: 'rgba(0,0,0,.25)' }}
+                      />
                     }
+                    value={search}
+                    onChange={this.updateSearch}
                   />
-                </AttendeesList>
-              </Card>
-            )}
-          </Section>
-        </Wrapper>
-      </Container>
+
+                  <AttendeesList>
+                    <List
+                      dataSource={filteredAttendees}
+                      renderItem={(attendee: Attendee) =>
+                        editing.some(a => a.id === attendee.id) ? (
+                          <AttendeeEdit
+                            attendee={attendee}
+                            categories={categories}
+                            cancelEditing={this.toggleAttendeeEdit}
+                            updating={editing.some(
+                              a => a.updating && a.id === attendee.id
+                            )}
+                            updateAttendee={this.updateAttendee}
+                          />
+                        ) : (
+                          <List.Item>
+                            <List.Item.Meta
+                              title={attendee.name}
+                              description={attendee.category.name}
+                            />
+                            <Button
+                              type="dashed"
+                              onClick={() =>
+                                this.toggleAttendeeEdit(attendee.id)
+                              }
+                            >
+                              Edit
+                            </Button>
+                          </List.Item>
+                        )
+                      }
+                    />
+                  </AttendeesList>
+                </Card>
+              )}
+            </Section>
+          </Wrapper>
+        </Container>
+      </DocumentTitle>
     );
   }
 }
