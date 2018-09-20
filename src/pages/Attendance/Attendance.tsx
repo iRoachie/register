@@ -80,8 +80,9 @@ export default class Attendance extends React.Component<Props, State> {
       fetched: fetched + 1,
       categories: categories.map(a => ({
         ...a,
-        present: attendees.filter(b => b.category.id === a.id && b.present)
-          .length,
+        present: attendees.filter(
+          b => b.category && b.category.id === a.id && b.present
+        ).length,
       })),
     }));
   };
@@ -94,8 +95,9 @@ export default class Attendance extends React.Component<Props, State> {
         ({
           id: a.id,
           ...a.data(),
-          present: attendees.filter(b => b.category.id === a.id && b.present)
-            .length,
+          present: attendees.filter(
+            b => b.category && b.category.id === a.id && b.present
+          ).length,
         } as Category)
     );
 
@@ -190,7 +192,7 @@ export default class Attendance extends React.Component<Props, State> {
                       />
                     }
                     title={a.name}
-                    description={a.category.name}
+                    description={a.category ? a.category.name : 'No Category'}
                   />
                 </List.Item>
               )}

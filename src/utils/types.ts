@@ -17,6 +17,6 @@ export interface Attendee {
   id: string;
   createdAt: number;
   name: string;
-  category: Category;
+  category?: Category;
   present: boolean;
 }

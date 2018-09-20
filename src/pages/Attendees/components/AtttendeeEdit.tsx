@@ -15,7 +15,10 @@ interface Props extends FormComponentProps {
 class AttendeeEdit extends React.Component<Props> {
   componentDidMount() {
     const { name, category } = this.props.attendee;
-    this.props.form.setFieldsValue({ name, category: category.id });
+    this.props.form.setFieldsValue({
+      name,
+      category: category ? category.id : null,
+    });
   }
 
   submitHandler = (event: React.SyntheticEvent) => {

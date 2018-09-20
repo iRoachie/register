@@ -345,7 +345,11 @@ class Attendees extends React.Component<Props, State> {
                           <List.Item>
                             <List.Item.Meta
                               title={attendee.name}
-                              description={attendee.category.name}
+                              description={
+                                attendee.category
+                                  ? attendee.category.name
+                                  : 'No Category'
+                              }
                             />
                             <Button
                               type="dashed"
