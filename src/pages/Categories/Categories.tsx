@@ -3,7 +3,16 @@ import { Wrapper, Loading, Section, EmptyData } from 'components';
 import { firebase } from 'config';
 import { Category, pageTitle } from 'utils';
 import styled from '@styled';
-import { Form, Input, Icon, Button, message, Tag } from 'antd';
+import {
+  Form,
+  Input,
+  Icon,
+  Button,
+  message,
+  Tag,
+  Popconfirm,
+  notification,
+} from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
 import DocumentTitle from 'react-document-title';
@@ -103,6 +112,29 @@ class Categories extends React.Component<Props, State> {
     }
   };
 
+  deleteCategory = async ({ id, name }: Category) => {
+    const { eventId } = this.props.match.params;
+
+    try {
+      await firebase
+        .firestore()
+        .collection('events')
+        .doc(eventId)
+        .collection('categories')
+        .doc(id)
+        .delete();
+
+      notification.success({
+        message: `Category "${name}" deleted.`,
+        description:
+          'All attendees previously assigned this category will be unassigned shortly.',
+        duration: 7,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   render() {
     const { loading, fetching, categories } = this.state;
     const { getFieldDecorator } = this.props.form;
@@ -161,7 +193,16 @@ class Categories extends React.Component<Props, State> {
                 />
               ) : (
                 categories.map(a => (
-                  <CategoryTag key={a.id}>{a.name}</CategoryTag>
+                  <Popconfirm
+                    key={a.id}
+                    title="Are you sure want to delete this category?"
+                    onConfirm={() => this.deleteCategory(a)}
+                    okText="Yes"
+                    cancelText="No"
+                    okType="danger"
+                  >
+                    <CategoryTag>{a.name}</CategoryTag>
+                  </Popconfirm>
                 ))
               )}
             </Section>
@@ -188,6 +229,8 @@ const CategoryForm = styled(Form)`
 
 const CategoryTag = styled(Tag)`
   font-size: 14px;
+  padding: 3px 7px;
+  height: unset;
 `;
 
 export default Form.create()(Categories);
