@@ -19,6 +19,7 @@ import {
   List,
   Card,
   Badge,
+  Popconfirm,
 } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { RouteComponentProps } from 'react-router';
@@ -223,6 +224,40 @@ class Attendees extends React.Component<Props, State> {
     );
   };
 
+  deleteAttendee = ({ id, name, category }: Attendee) => {
+    this.setState(
+      ({ editing }) => ({
+        editing: editing.map(a => (a.id === id ? { ...a, updating: true } : a)),
+      }),
+      async () => {
+        const { eventId } = this.props.match.params;
+
+        try {
+          await firebase
+            .firestore()
+            .collection('events')
+            .doc(eventId)
+            .collection('attendees')
+            .doc(id)
+            .delete();
+
+          const categoryName = category ? category.name : 'No Category';
+
+          message.success(
+            `Attendee "${name}" from "${categoryName}" deleted.`,
+            3
+          );
+
+          this.setState(({ editing }) => ({
+            editing: editing.filter(a => a.id !== id),
+          }));
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    );
+  };
+
   render() {
     const {
       loading,
@@ -342,7 +377,29 @@ class Attendees extends React.Component<Props, State> {
                             updateAttendee={this.updateAttendee}
                           />
                         ) : (
-                          <List.Item>
+                          <List.Item
+                            actions={[
+                              <Button
+                                key="edit"
+                                type="dashed"
+                                onClick={() =>
+                                  this.toggleAttendeeEdit(attendee.id)
+                                }
+                              >
+                                Edit
+                              </Button>,
+                              <Popconfirm
+                                key="delete"
+                                title="Are you sure want to delete this attendee?"
+                                onConfirm={() => this.deleteAttendee(attendee)}
+                                okText="Yes"
+                                cancelText="No"
+                                okType="danger"
+                              >
+                                <Button type="danger">Delete</Button>
+                              </Popconfirm>,
+                            ]}
+                          >
                             <List.Item.Meta
                               title={attendee.name}
                               description={
@@ -351,14 +408,6 @@ class Attendees extends React.Component<Props, State> {
                                   : 'No Category'
                               }
                             />
-                            <Button
-                              type="dashed"
-                              onClick={() =>
-                                this.toggleAttendeeEdit(attendee.id)
-                              }
-                            >
-                              Edit
-                            </Button>
                           </List.Item>
                         )
                       }
