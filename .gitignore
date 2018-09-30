@@ -1,8 +1,10 @@
 *.log
 node_modules
 .cache
-dist
+dist/**
 .env
 .idea
 .DS_Store
 lib
+
+!dist/_redirects
