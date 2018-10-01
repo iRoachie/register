@@ -231,6 +231,7 @@ const CategoryTag = styled(Tag)`
   font-size: 14px;
   padding: 3px 7px;
   height: unset;
+  margin-bottom: .5rem;
 `;
 
 export default Form.create()(Categories);
