@@ -1,16 +1,26 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Card, Input, Icon, Checkbox, List } from 'antd';
+import {
+  Card,
+  Input,
+  Icon,
+  Checkbox,
+  List,
+  Button,
+  Popconfirm,
+  message,
+} from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
 import { Wrapper, Loading, AttendeesList, EmptyData } from 'components';
 import { Category, Attendee, pageTitle } from 'utils';
-import { firebase } from 'config';
+import { firebase, Theme } from 'config';
 import styled from '@styled';
 import DocumentTitle from 'react-document-title';
 
 interface State {
   search: string;
+  loading: boolean;
   fetched: number;
   categories: Category[];
   attendees: Attendee[];
@@ -32,6 +42,7 @@ export default class Attendance extends React.Component<Props, State> {
 
     this.state = {
       search: '',
+      loading: false,
       fetched: 0,
       categories: [],
       attendees: [],
@@ -142,8 +153,43 @@ export default class Attendance extends React.Component<Props, State> {
     }
   };
 
+  clearAttendance = () => {
+    const { eventId } = this.props.match.params;
+    const { attendees } = this.state;
+
+    this.setState({ loading: true }, async () => {
+      try {
+        const batch = firebase.firestore().batch();
+
+        attendees.forEach(({ id }) => {
+          const ref = firebase
+            .firestore()
+            .collection('events')
+            .doc(eventId)
+            .collection('attendees')
+            .doc(id);
+
+          batch.update(ref, { present: false });
+        });
+
+        await batch.commit();
+
+        this.setState({ loading: false });
+        message.success('Attendence cleared.', 2);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  };
+
   render() {
-    const { fetched, categories, search, filteredAttendees } = this.state;
+    const {
+      fetched,
+      categories,
+      search,
+      filteredAttendees,
+      loading,
+    } = this.state;
 
     if (fetched < 2) {
       return (
@@ -176,28 +222,47 @@ export default class Attendance extends React.Component<Props, State> {
             prefix={<Icon type="search" style={{ color: 'rgba(0,0,0,.25)' }} />}
             value={search}
             onChange={this.updateSearch}
+            disabled={loading}
           />
 
-          <AttendeesList>
-            <List
-              dataSource={filteredAttendees}
-              renderItem={(a: Attendee) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={
-                      <AttendeeCheckbox
-                        name={a.id}
-                        checked={a.present}
-                        onChange={this.toggleChecked}
-                      />
-                    }
-                    title={a.name}
-                    description={a.category ? a.category.name : 'No Category'}
-                  />
-                </List.Item>
-              )}
-            />
-          </AttendeesList>
+          <AttendancePanel>
+            <ListActions>
+              <ListActionsTitle>Attendance Actions</ListActionsTitle>
+
+              <Popconfirm
+                title="Are you sure you want to clear the attendance?"
+                onConfirm={this.clearAttendance}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button loading={loading} disabled={loading}>
+                  Clear Attendance
+                </Button>
+              </Popconfirm>
+            </ListActions>
+
+            <AttendanceList>
+              <List
+                dataSource={filteredAttendees}
+                renderItem={(a: Attendee) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      avatar={
+                        <AttendeeCheckbox
+                          name={a.id}
+                          disabled={loading}
+                          checked={a.present}
+                          onChange={this.toggleChecked}
+                        />
+                      }
+                      title={a.name}
+                      description={a.category ? a.category.name : 'No Category'}
+                    />
+                  </List.Item>
+                )}
+              />
+            </AttendanceList>
+          </AttendancePanel>
         </RegisterWrapper>
       </DocumentTitle>
     );
@@ -233,4 +298,30 @@ const RegisterWrapper = styled(Wrapper)`
 const AttendeeCheckbox = styled(Checkbox)`
   margin-top: 2px;
   font-size: 16px;
+`;
+
+const ListActions = styled.aside`
+  background-color: ${Theme.colors.primary};
+  padding: 1rem;
+  width: 200px;
+
+  button {
+    width: 100%;
+  }
+`;
+
+const ListActionsTitle = styled.h3`
+  color: hsl(0, 0%, 100%);
+  margin-bottom: 1rem;
+`;
+
+const AttendancePanel = styled.section`
+  display: flex;
+  min-height
+`;
+
+const AttendanceList = styled(AttendeesList)`
+  flex: 1;
+  padding-left: 1rem;
+  padding-top: 0;
 `;
