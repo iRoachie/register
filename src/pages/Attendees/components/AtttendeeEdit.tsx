@@ -47,7 +47,7 @@ class AttendeeEdit extends React.Component<Props> {
 
           <Form onSubmit={this.submitHandler}>
             <Inputs>
-              <Form.Item>
+              <Form.Item label="Name">
                 {getFieldDecorator('name', {
                   rules: [
                     {
@@ -67,7 +67,7 @@ class AttendeeEdit extends React.Component<Props> {
                 )}
               </Form.Item>
 
-              <Form.Item>
+              <Form.Item label="Category">
                 {getFieldDecorator('category', {
                   rules: [
                     {
