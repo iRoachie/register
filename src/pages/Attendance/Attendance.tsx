@@ -236,6 +236,7 @@ export default class Attendance extends React.Component<Props, State> {
                 cancelText="No"
               >
                 <Button loading={loading} disabled={loading}>
+                  <Icon type="minus-square" theme="twoTone" />
                   Clear Attendance
                 </Button>
               </Popconfirm>
