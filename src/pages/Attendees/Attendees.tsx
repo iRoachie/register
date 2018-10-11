@@ -258,6 +258,11 @@ class Attendees extends React.Component<Props, State> {
     );
   };
 
+  excelExport = () => {
+    const { eventId } = this.props.match.params;
+    window.open(`${process.env.EXPORT_EXCEL_API}/?eventId=${eventId}`);
+  };
+
   render() {
     const {
       loading,
@@ -343,6 +348,12 @@ class Attendees extends React.Component<Props, State> {
                 </h3>
               }
               description="List of all attendees invited to this event."
+              content={
+                <Button type="dashed" onClick={this.excelExport}>
+                  <Icon type="file-excel" theme="twoTone" />
+                  Export To Excel
+                </Button>
+              }
             >
               {attendees.length === 0 ? (
                 <EmptyData

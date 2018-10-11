@@ -4,15 +4,23 @@ import styled from '@styled';
 interface Props {
   title: string | React.ReactNode;
   description: string;
+  content?: React.ReactNode;
   children: React.ReactNode;
 }
 
-const Section: React.SFC<Props> = ({ title, description, children }) => {
+const Section: React.SFC<Props> = ({
+  title,
+  description,
+  children,
+  content,
+}) => {
   return (
     <Container>
       <Meta>
         {typeof title !== 'string' ? title : <h3>{title}</h3>}
         <p>{description}</p>
+
+        {content && <MetaContent>{content}</MetaContent>}
       </Meta>
 
       <Content>{children}</Content>
@@ -30,6 +38,16 @@ const Container = styled.section`
 
 const Meta = styled.div`
   flex: 3;
+`;
+
+const MetaContent = styled.div`
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: ${({ theme }) => theme.border};
+
+  button {
+    width: 100%;
+  }
 `;
 
 const Content = styled.div`
