@@ -338,7 +338,8 @@ class Attendees extends React.Component<Props, State> {
             <Section
               title={
                 <h3>
-                  Attendees <Badge count={attendees.length} />
+                  Attendees{' '}
+                  <Badge count={attendees.length} overflowCount={9999} />
                 </h3>
               }
               description="List of all attendees invited to this event."
