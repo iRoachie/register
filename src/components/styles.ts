@@ -21,6 +21,6 @@ export const Hr = styled.hr`
 export const AttendeesList = styled.div`
   border-top: ${({ theme }) => theme.border};
   padding-top: 20px;
-  max-height: 400px;
+  max-height: 530px;
   overflow-y: scroll;
 `;
