@@ -7,6 +7,10 @@ import * as XLSX from 'xlsx';
 
 const corsHandler = cors({ origin: true });
 
+admin.initializeApp();
+
+const database = admin.firestore();
+
 /**
  * Updates attendee category when a category is deleted
  */
@@ -15,8 +19,7 @@ export const updateAttendeeCategory = functions.firestore
   .onDelete(async (_, context) => {
     const { eventId, categoryId } = context.params;
 
-    const { docs } = await admin
-      .firestore()
+    const { docs } = await database
       .collection('events')
       .doc(eventId)
       .collection('attendees')
@@ -32,8 +35,7 @@ export const updateAttendeeCategory = functions.firestore
 
         delete attendee.category;
 
-        return admin
-          .firestore()
+        return database
           .collection('events')
           .doc(eventId)
           .collection('attendees')
@@ -63,8 +65,7 @@ export const excel = functions.https.onRequest(async (req, res) => {
   }
 
   try {
-    const snapshot = await admin
-      .firestore()
+    const snapshot = await database
       .collection('events')
       .doc(eventId)
       .collection('attendees')
