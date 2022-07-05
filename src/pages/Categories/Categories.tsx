@@ -1,128 +1,59 @@
-import React from 'react';
-import { Wrapper, Loading, Section, EmptyData } from 'components';
-import { firebase } from 'config';
-import { Category, pageTitle } from 'utils';
-import styled from '@styled';
+import React, { useState } from 'react';
+import { Wrapper, Loading, Section, EmptyData } from '../../components';
+import { firestore } from '../../config';
+import styled from 'styled-components';
 import {
   Form,
   Input,
-  Icon,
   Button,
   message,
   Tag,
   Popconfirm,
   notification,
 } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
-import { RouteComponentProps } from 'react-router';
-import DocumentTitle from 'react-document-title';
+import { addDoc, collection, deleteDoc, doc } from 'firebase/firestore';
+import { TagOutlined } from '@ant-design/icons';
+import { useOutletContext, useParams } from 'react-router-dom';
+import { usePageTitle } from '../../utils/usePageTitle';
+import { Category, ViewEventContext } from '../../utils/types';
 
-interface State {
-  fetching: boolean;
-  loading: boolean;
-  categories: Category[];
-}
+export const Categories = () => {
+  const { eventId } = useParams();
+  usePageTitle('Categories');
+  const [form] = Form.useForm();
 
-interface Params {
-  eventId: string;
-}
+  const { categories, categoriesStatus } = useOutletContext<ViewEventContext>();
+  const [loading, setLoading] = useState(false);
 
-type Props = FormComponentProps & RouteComponentProps<Params>;
+  const onCreateCategory = async ({ category }: { category: string }) => {
+    setLoading(true);
 
-class Categories extends React.Component<Props, State> {
-  categoriesSubscription: () => void;
-
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      fetching: true,
-      loading: false,
-      categories: [],
-    };
-  }
-
-  componentDidMount() {
-    const { eventId } = this.props.match.params;
-
-    this.categoriesSubscription = firebase
-      .firestore()
-      .collection('events')
-      .doc(eventId)
-      .collection('categories')
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(this.updateCategories, console.error);
-  }
-
-  componentWillUnmount() {
-    this.categoriesSubscription();
-  }
-
-  updateCategories = (snapshot: firebase.firestore.QuerySnapshot) => {
-    const categories = snapshot.docs.map(
-      a =>
-        ({
-          ...a.data(),
-          id: a.id,
-        } as Category)
-    );
-
-    this.setState({ categories, fetching: false });
-  };
-
-  submitHandler = (event: React.SyntheticEvent) => {
-    event.preventDefault();
-
-    this.props.form!.validateFields((err, values) => {
-      if (!err) {
-        this.setState({ loading: true }, () =>
-          this.createCategory(values.category)
-        );
-      }
-    });
-  };
-
-  createCategory = async (category: string) => {
     try {
-      const { categories } = this.state;
-      const { eventId } = this.props.match.params;
-
       if (
-        categories &&
-        categories.find(a => a.name.toLowerCase() === category.toLowerCase())
+        categories?.find((a) => a.name.toLowerCase() === category.toLowerCase())
       ) {
         message.error('Category already added');
-        this.setState({ loading: false });
         return;
       }
 
-      await firebase
-        .firestore()
-        .collection('events')
-        .doc(eventId)
-        .collection('categories')
-        .add({ name: category, createdAt: Date.now() });
+      await addDoc(collection(firestore, `events/${eventId}/categories`), {
+        name: category,
+        createdAt: Date.now(),
+      });
 
       message.success(`Category "${category}" created.`, 3);
 
-      this.props.form.setFields({ category: '' });
-      this.setState({ loading: false });
+      form.setFields([{ name: 'category', value: '' }]);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  deleteCategory = async ({ id, name }: Category) => {
-    const { eventId } = this.props.match.params;
-
+  const onDeleteCategory = async ({ id, name }: Category) => {
     try {
-      await firebase
-        .firestore()
-        .collection('events')
-        .doc(eventId)
-        .collection('categories')
-        .doc(id)
-        .delete();
+      await deleteDoc(doc(firestore, `events/${eventId}/categories/${id}`));
 
       notification.success({
         message: `Category "${name}" deleted.`,
@@ -135,103 +66,82 @@ class Categories extends React.Component<Props, State> {
     }
   };
 
-  render() {
-    const { loading, fetching, categories } = this.state;
-    const { getFieldDecorator } = this.props.form;
-
-    if (fetching) {
-      return (
-        <DocumentTitle title={pageTitle('Loading...')}>
-          <Loading />
-        </DocumentTitle>
-      );
-    }
-
-    return (
-      <DocumentTitle title={pageTitle('Categories')}>
-        <Container>
-          <Wrapper>
-            <Section
-              title="New Category"
-              description="Add a new category to group attendees by."
-            >
-              <CategoryForm onSubmit={this.submitHandler} layout="inline">
-                <Form.Item>
-                  {getFieldDecorator('category', {
-                    rules: [
-                      {
-                        required: true,
-                        message: 'Please input category name!',
-                      },
-                    ],
-                  })(
-                    <Input
-                      type="text"
-                      disabled={loading}
-                      prefix={
-                        <Icon type="tag" style={{ color: 'rgba(0,0,0,.25)' }} />
-                      }
-                      placeholder="Category"
-                    />
-                  )}
-                </Form.Item>
-
-                <Button htmlType="submit" type="primary" loading={loading}>
-                  Add Category
-                </Button>
-              </CategoryForm>
-            </Section>
-
-            <Section
-              title="Categories"
-              description="List of all categories for this event."
-            >
-              {categories.length === 0 ? (
-                <EmptyData
-                  title="No Categories Added as Yet"
-                  description="Fortunately, it’s very easy to create one."
-                />
-              ) : (
-                categories.map(a => (
-                  <Popconfirm
-                    key={a.id}
-                    title="Are you sure want to delete this category?"
-                    onConfirm={() => this.deleteCategory(a)}
-                    okText="Yes"
-                    cancelText="No"
-                    okType="danger"
-                  >
-                    <CategoryTag>{a.name}</CategoryTag>
-                  </Popconfirm>
-                ))
-              )}
-            </Section>
-          </Wrapper>
-        </Container>
-      </DocumentTitle>
-    );
+  if (categoriesStatus === 'loading') {
+    return <Loading />;
   }
-}
+
+  return (
+    <Container>
+      <Wrapper>
+        <Section
+          title="New Category"
+          description="Add a new category to group attendees by."
+        >
+          <CategoryForm form={form} onFinish={onCreateCategory} layout="inline">
+            <Form.Item
+              name="category"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input category name!',
+                },
+              ]}
+            >
+              <Input
+                type="text"
+                disabled={loading}
+                prefix={<TagOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                placeholder="Category"
+              />
+            </Form.Item>
+
+            <Button htmlType="submit" type="primary" loading={loading}>
+              Add Category
+            </Button>
+          </CategoryForm>
+        </Section>
+
+        <Section
+          title="Categories"
+          description="List of all categories for this event."
+        >
+          {categories.length === 0 ? (
+            <EmptyData
+              title="No Categories Added as Yet"
+              description="Fortunately, it’s very easy to create one."
+            />
+          ) : (
+            categories.map((a) => (
+              <Popconfirm
+                key={a.id}
+                title="Are you sure want to delete this category?"
+                onConfirm={() => onDeleteCategory(a)}
+                okText="Yes"
+                cancelText="No"
+                okType="danger"
+              >
+                <CategoryTag>{a.name}</CategoryTag>
+              </Popconfirm>
+            ))
+          )}
+        </Section>
+      </Wrapper>
+    </Container>
+  );
+};
 
 const Container = styled.div`
   margin-top: 30px;
 `;
 
-// @ts-ignore
 const CategoryForm = styled(Form)`
   display: flex;
   align-items: flex-start;
-
-  button {
-    margin-top: 4px;
-  }
-`;
+` as typeof Form;
 
 const CategoryTag = styled(Tag)`
   font-size: 14px;
   padding: 3px 7px;
   height: unset;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
 `;
-
-export default Form.create()(Categories);

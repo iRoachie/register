@@ -1,148 +1,117 @@
-import React from 'react';
-import styled from '@styled';
-import { RouteComponentProps } from 'react-router';
-import { Button, Card, Input, Form, Icon } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
-import DocumentTitle from 'react-document-title';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { Button, Card, Input, Form } from 'antd';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
-import { Loading } from 'components';
-import { firebase } from 'config';
-import { pageTitle } from 'utils';
+import { Loading } from '../../components';
+import { auth } from '../../config';
+import { LockOutlined, MailOutlined } from '@ant-design/icons';
+import { usePageTitle } from '../../utils/usePageTitle';
+import { FirebaseError } from 'firebase/app';
 
-const FormItem = Form.Item;
+export const Login = () => {
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [form] = Form.useForm();
 
-interface State {
-  checkingAuth: boolean;
-  loading: boolean;
-  error: string;
-}
+  usePageTitle('Login');
+  const navigate = useNavigate();
 
-class Login extends React.Component<
-  FormComponentProps & RouteComponentProps,
-  State
-> {
-  state = {
-    checkingAuth: true,
-    loading: false,
-    error: '',
-  };
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCheckingAuth(false);
 
-  componentWillMount() {
-    firebase.auth().onAuthStateChanged(user => {
-      this.setState({ checkingAuth: false }, () => {
-        if (user) {
-          this.props.history.push('/');
-        }
-      });
-    });
-  }
-
-  handleSubmit = (event: React.SyntheticEvent) => {
-    event.preventDefault();
-
-    this.setState({ error: '' });
-
-    this.props.form!.validateFields((err, values) => {
-      if (!err) {
-        this.setState({ loading: true }, () => this.login(values));
+      if (user) {
+        navigate('/');
       }
     });
-  };
 
-  login = async ({ email, password }: { email: string; password: string }) => {
+    return unsubscribe;
+  }, [navigate]);
+
+  const login = async ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => {
+    setLoading(true);
+
     try {
-      await firebase.auth().signInWithEmailAndPassword(email, password);
-      this.setState({ loading: false });
+      await signInWithEmailAndPassword(auth, email, password);
+      setLoading(false);
     } catch (error) {
       let message = 'Error logging in';
 
-      switch (error.code) {
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-          message = 'Incorrect email or password';
-          break;
-        default:
-          console.log(error);
+      if (error instanceof FirebaseError) {
+        switch (error.code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            message = 'Incorrect email or password';
+            break;
+          default:
+            console.log(error);
+        }
       }
 
-      this.setState({ loading: false, error: message });
+      setError(message);
+      setLoading(false);
     }
   };
 
-  render() {
-    const { getFieldDecorator } = this.props.form!;
-    const { loading, error, checkingAuth } = this.state;
-    return (
-      <DocumentTitle title={pageTitle('Login')}>
-        {checkingAuth ? (
-          <Loading />
-        ) : (
-          <Container>
-            <Box>
-              <h1>Login</h1>
-
-              <Form onSubmit={this.handleSubmit}>
-                <FormItem>
-                  {getFieldDecorator('email', {
-                    rules: [
-                      {
-                        required: true,
-                        message: 'Please input your username!',
-                      },
-                    ],
-                  })(
-                    <Input
-                      type="email"
-                      disabled={loading}
-                      prefix={
-                        <Icon
-                          type="mail"
-                          style={{ color: 'rgba(0,0,0,.25)' }}
-                        />
-                      }
-                      placeholder="Email Address"
-                    />
-                  )}
-                </FormItem>
-
-                <FormItem>
-                  {getFieldDecorator('password', {
-                    rules: [
-                      {
-                        required: true,
-                        message: 'Please input your password!',
-                      },
-                    ],
-                  })(
-                    <Input
-                      type="password"
-                      disabled={loading}
-                      prefix={
-                        <Icon
-                          type="lock"
-                          style={{ color: 'rgba(0,0,0,.25)' }}
-                        />
-                      }
-                      placeholder="Password"
-                    />
-                  )}
-                </FormItem>
-
-                <Error>{error}</Error>
-
-                <LoginButton htmlType="submit" type="primary" loading={loading}>
-                  Log in
-                </LoginButton>
-              </Form>
-            </Box>
-          </Container>
-        )}
-      </DocumentTitle>
-    );
+  if (checkingAuth) {
+    return <Loading />;
   }
-}
 
-/** Styles */
+  return (
+    <Container>
+      <Box>
+        <h1>Login</h1>
+        <Form form={form} onFinish={login}>
+          <Form.Item
+            name="email"
+            rules={[{ required: true, message: 'Please input your username!' }]}
+          >
+            <Input
+              type="email"
+              disabled={loading}
+              prefix={<MailOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+              placeholder="Email Address"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            rules={[
+              {
+                required: true,
+                message: 'Please input your password!',
+              },
+            ]}
+          >
+            <Input
+              type="password"
+              disabled={loading}
+              prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+              placeholder="Password"
+            />
+          </Form.Item>
+
+          <Error>{error}</Error>
+
+          <LoginButton htmlType="submit" type="primary" loading={loading}>
+            Log in
+          </LoginButton>
+        </Form>
+      </Box>
+    </Container>
+  );
+};
+
+// /** Styles */
 const Container = styled.main`
   min-height: 100vh;
   display: flex;
@@ -156,7 +125,6 @@ const Box = styled(Card)`
   text-align: center;
 `;
 
-// @ts-ignore
 const LoginButton = styled(Button)`
   width: 100%;
 `;
@@ -164,5 +132,3 @@ const LoginButton = styled(Button)`
 const Error = styled.p`
   color: ${({ theme }) => theme.colors.error};
 `;
-
-export default Form.create()(Login as any);

@@ -1,36 +1,28 @@
-import React from 'react';
-import { firebase } from 'config';
+import React, { useEffect, useState } from 'react';
+import { auth } from '../config';
 
-const AuthContext = React.createContext({ loggedIn: null });
+interface State {
+  status: 'loading' | 'loggedIn' | 'loggedOut';
+}
+
+export const AuthContext = React.createContext<State>({
+  status: 'loading',
+});
 
 interface Props {
   children: React.ReactNode;
 }
 
-interface State {
-  loggedIn: boolean | null;
-}
+export const AuthProvider = ({ children }: Props) => {
+  const [status, setStatus] = useState<State['status']>('loading');
 
-class AuthProvider extends React.Component<Props, State> {
-  state = {
-    loggedIn: null,
-  };
-
-  componentDidMount() {
-    firebase.auth().onAuthStateChanged(user => {
-      this.setState({ loggedIn: !!user });
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      setStatus(user ? 'loggedIn' : 'loggedOut');
     });
-  }
+  }, []);
 
-  render() {
-    return (
-      <AuthContext.Provider value={this.state}>
-        {this.props.children}
-      </AuthContext.Provider>
-    );
-  }
-}
-
-const AuthConsumer = AuthContext.Consumer;
-
-export { AuthConsumer, AuthProvider };
+  return (
+    <AuthContext.Provider value={{ status }}>{children}</AuthContext.Provider>
+  );
+};

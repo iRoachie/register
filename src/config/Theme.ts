@@ -1,14 +1,6 @@
-interface ThemeInterface {
-  colors: {
-    primary: string;
-    error: string;
-  };
-  border: string;
-  sidebarWidth: string;
-  headerHeight: string;
-}
+import { DefaultTheme } from 'styled-components';
 
-const Theme: ThemeInterface = {
+const Theme: DefaultTheme = {
   colors: {
     primary: 'hsl(209, 100%, 54%)',
     error: 'hsl(357, 91%, 55%)',
@@ -18,5 +10,4 @@ const Theme: ThemeInterface = {
   border: '1px solid rgba(0,0,0,0.1)',
 };
 
-export { ThemeInterface };
 export default Theme;

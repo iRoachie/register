@@ -1,17 +1,14 @@
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
-import 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-const config = {
-  apiKey: process.env.FIREBASE_apiKey,
-  authDomain: process.env.FIREBASE_authDomain,
-  databaseURL: process.env.FIREBASE_databaseURL,
-  projectId: process.env.FIREBASE_projectId,
-};
+const app = initializeApp({
+  apiKey: import.meta.env.VITE_FIREBASE_apiKey,
+  authDomain: import.meta.env.VITE_FIREBASE_authDomain,
+  databaseURL: import.meta.env.VITE_FIREBASE_databaseURL,
+  projectId: import.meta.env.VITE_FIREBASE_projectId,
+  appId: import.meta.env.VITE_FIREBASE_appId,
+});
 
-export default firebase.initializeApp(config);
-
-const firestore = firebase.firestore();
-const settings = { timestampsInSnapshots: true };
-firestore.settings(settings);
+export const auth = getAuth(app);
+export const firestore = getFirestore(app);

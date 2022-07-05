@@ -20,3 +20,10 @@ export interface Attendee {
   category?: Category;
   present: boolean;
 }
+
+export interface ViewEventContext {
+  categories: Category[];
+  attendees: Attendee[];
+  categoriesStatus: 'loading' | 'success';
+  attendeesStatus: 'loading' | 'success';
+}
