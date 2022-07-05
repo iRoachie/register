@@ -1,54 +1,68 @@
 import React from 'react';
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-import { Login, Events, ViewEvent } from 'pages';
 import { AuthProvider } from './Auth';
-import { PrivateRoute, pageTitle } from 'utils';
-import { Theme } from 'config';
-import DocumentTitle from 'react-document-title';
+import { usePageTitle } from '../utils/usePageTitle';
+import { RequireAuth } from '../utils/RequireAuth';
 
-const Shell = () => (
-  <DocumentTitle title={pageTitle('Loading...')}>
-    <ThemeProvider theme={Theme}>
-      <AuthProvider>
-        <Router>
-          <Switch>
-            <Route exact path="/login" component={Login} />
-            <PrivateRoute exact path="/" component={Events} />
-            <Redirect exact path="/events" to="/" />
-            <PrivateRoute exact path="/events/new" component={Events} />
-            <Redirect
-              exact
-              path="/events/:eventId"
-              to="/events/:eventId/attendance"
-            />
-            <PrivateRoute
-              exact
-              path="/events/:eventId/categories"
-              component={ViewEvent}
-            />
-            <PrivateRoute
-              exact
-              path="/events/:eventId/attendees"
-              component={ViewEvent}
-            />
-            <PrivateRoute
-              exact
-              path="/events/:eventId/attendance"
-              component={ViewEvent}
-            />
-            <Redirect to="/" />
-          </Switch>
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
-  </DocumentTitle>
-);
+import { Login } from '../pages/Login/Login';
+import { Page404 } from '../pages/404/Page404';
+import { Attendance } from '../pages/Attendance/Attendance';
+import { Attendees } from '../pages/Attendees/Attendees';
+import { Categories } from '../pages/Categories/Categories';
+import { EventList } from '../pages/Events/components/EventList';
+import { NewEvent } from '../pages/Events/components/NewEvent';
+import { Events } from '../pages/Events/Events';
+import { ViewEvent } from '../pages/ViewEvent/ViewEvent';
 
-export default Shell;
+export const Shell = () => {
+  usePageTitle('Loading...');
+
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="login" element={<Login />} />
+
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <Events />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<EventList />} />
+          </Route>
+
+          <Route
+            path="/events"
+            element={
+              <RequireAuth>
+                <Events />
+              </RequireAuth>
+            }
+          >
+            <Route path="new" element={<NewEvent />} />
+          </Route>
+
+          <Route
+            path="/events/:eventId"
+            element={
+              <RequireAuth>
+                <ViewEvent />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<Navigate to="attendance" />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="attendees" element={<Attendees />} />
+            <Route path="attendance" element={<Attendance />} />
+          </Route>
+
+          <Route path="*" element={<Page404 />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+};

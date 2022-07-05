@@ -1,9 +1,17 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
+import { ThemeProvider } from 'styled-components';
 import 'antd/dist/antd.css';
 
-import 'config/firebase';
+import './config/firebase';
 
-import Shell from './containers/Shell';
+import { Shell } from './containers/Shell';
+import { Theme } from './config';
 
-ReactDOM.render(<Shell />, document.getElementById('root'));
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+  <React.StrictMode>
+    <ThemeProvider theme={Theme}>
+      <Shell />
+    </ThemeProvider>
+  </React.StrictMode>
+);

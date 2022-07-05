@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from '@styled';
+import styled from 'styled-components';
 import { Card } from 'antd';
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const EmptyData: React.SFC<Props> = ({ title, description, children }) => (
+const EmptyData = ({ title, description, children }: Props) => (
   <article>
     <EmptyCard>
       <h2>{title}</h2>

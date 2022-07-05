@@ -1,12 +1,12 @@
 import React from 'react';
-import { withRouter, RouteComponentProps, Link } from 'react-router-dom';
-import styled from '@styled';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 
 type Props = {
   children: React.ReactNode;
-} & RouteComponentProps;
+};
 
-const Sidebar: React.SFC<Props> = ({ children }) => (
+export const Sidebar = ({ children }: Props) => (
   <Aside>
     <Link to="/">
       <Logo xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -89,5 +89,3 @@ const Logo = styled.svg`
   margin: 0 auto 30px;
   display: block;
 `;
-
-export default withRouter(Sidebar);

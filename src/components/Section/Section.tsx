@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from '@styled';
+import styled from 'styled-components';
 
 interface Props {
   title: string | React.ReactNode;
@@ -8,12 +8,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-const Section: React.SFC<Props> = ({
-  title,
-  description,
-  children,
-  content,
-}) => {
+const Section = ({ title, description, children, content }: Props) => {
   return (
     <Container>
       <Meta>

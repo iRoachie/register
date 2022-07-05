@@ -1,7 +1,7 @@
 import React from 'react';
-import styled from '@styled';
+import styled from 'styled-components';
 import { Button } from 'antd';
-import { firebase } from 'config';
+import { auth } from '../../config';
 
 interface Props {
   title?: string;
@@ -23,18 +23,12 @@ interface Props {
 
 class Header extends React.Component<Props> {
   signOut = () => {
-    firebase.auth().signOut();
+    auth.signOut();
   };
 
   render() {
-    const {
-      title,
-      titleLink,
-      headerRight,
-      inset,
-      fixed,
-      insetFlow,
-    } = this.props;
+    const { title, titleLink, headerRight, inset, fixed, insetFlow } =
+      this.props;
 
     return (
       <Content inset={inset} fixed={fixed} insetFlow={insetFlow}>
@@ -45,6 +39,7 @@ class Header extends React.Component<Props> {
         <HeaderRight>
           {!!headerRight && headerRight()}
           <Separator />
+
           <Button onClick={this.signOut} type="dashed">
             Sign Out
           </Button>

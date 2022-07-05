@@ -1,113 +1,73 @@
-import React from 'react';
-import { RouteComponentProps, NavLink, Switch, Route } from 'react-router-dom';
-import styled from '@styled';
-import { Sidebar, Header, Loading } from 'components';
-import { IEvent, pageTitle } from 'utils';
-import { firebase } from 'config';
+import React, { useEffect, useState } from 'react';
+import { NavLink, Outlet, useParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { Sidebar, Header, Loading } from '../../components';
 
-import { Icon } from 'antd';
-import Categories from '../Categories';
-import Attendees from '../Attendees';
-import Attendance from '../Attendance';
-import DocumentTitle from 'react-document-title';
+import { doc, getDoc } from 'firebase/firestore';
+import { firestore } from '../../config';
+import { SolutionOutlined, TagOutlined, UserOutlined } from '@ant-design/icons';
+import { IEvent } from '../../utils/types';
+import { useGetCategories } from '../../hooks/useGetCategories';
+import { useGetAttendees } from '../../hooks/useGetAttendees';
 
-interface Params {
-  eventId: string;
-}
+export const ViewEvent = () => {
+  const { eventId } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [event, setEvent] = useState<IEvent | null>(null);
 
-type Props = RouteComponentProps<Params>;
+  const { categories, status: categoriesStatus } = useGetCategories(eventId!);
+  const { attendees, status: attendeesStatus } = useGetAttendees(eventId!);
 
-interface State {
-  loading: boolean;
-  event: IEvent | null;
-}
-
-class ViewEvent extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      event: null,
-      loading: true,
+  useEffect(() => {
+    const getEvent = async () => {
+      try {
+        const event = await getDoc(doc(firestore, `events/${eventId}`));
+        setEvent(event.data() as IEvent);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     };
-  }
 
-  componentDidMount() {
-    this.getEvent();
-  }
+    getEvent();
+  }, [eventId]);
 
-  getEvent = async () => {
-    const { eventId } = this.props.match.params;
-
-    try {
-      const event = await firebase
-        .firestore()
-        .collection('events')
-        .doc(eventId)
-        .get();
-
-      this.setState({ loading: false, event: event.data() as IEvent });
-    } catch (error) {
-      console.error(error);
-      this.setState({ loading: false });
-    }
-  };
-
-  render() {
-    const { eventId } = this.props.match.params;
-    const { loading, event } = this.state;
-
-    const baseURL = `/events/${eventId}`;
-
-    if (!loading && !!event) {
-      return (
-        <Container>
-          <Sidebar>
-            <MenuLink to={`${baseURL}/attendance`}>
-              <Icon type="solution" theme="outlined" /> Attendance
-            </MenuLink>
-            <MenuLink to={`${baseURL}/categories`}>
-              <Icon type="tag" theme="outlined" /> Categories
-            </MenuLink>
-            <MenuLink to={`${baseURL}/attendees`}>
-              <Icon type="user" theme="outlined" /> Attendees
-            </MenuLink>
-          </Sidebar>
-
-          <Content>
-            <Header title={event.name} inset fixed />
-
-            <ContentWrapper>
-              <Switch>
-                <Route
-                  exact
-                  path="/events/:eventId/categories"
-                  component={Categories}
-                />
-                <Route
-                  exact
-                  path="/events/:eventId/attendees"
-                  component={Attendees}
-                />
-                <Route
-                  exact
-                  path="/events/:eventId/attendance"
-                  component={Attendance}
-                />
-              </Switch>
-            </ContentWrapper>
-          </Content>
-        </Container>
-      );
-    }
-
+  if (!loading && !!event) {
     return (
-      <DocumentTitle title={pageTitle('Loading...')}>
-        <Loading />
-      </DocumentTitle>
+      <Container>
+        <Sidebar>
+          <MenuLink to="attendance">
+            <SolutionOutlined /> &nbsp; Attendance
+          </MenuLink>
+          <MenuLink to="categories">
+            <TagOutlined /> &nbsp; Categories
+          </MenuLink>
+          <MenuLink to="attendees">
+            <UserOutlined /> &nbsp; Attendees
+          </MenuLink>
+        </Sidebar>
+
+        <Content>
+          <Header title={event.name} inset fixed />
+
+          <ContentWrapper>
+            <Outlet
+              context={{
+                categories,
+                attendees,
+                categoriesStatus,
+                attendeesStatus,
+              }}
+            />
+          </ContentWrapper>
+        </Content>
+      </Container>
     );
   }
-}
+
+  return <Loading />;
+};
 
 const Container = styled.div`
   min-height: 100vh;
@@ -149,5 +109,3 @@ const MenuLink = styled(NavLink)`
     text-decoration: none;
   }
 `;
-
-export default ViewEvent;

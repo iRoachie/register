@@ -1,10 +1,10 @@
-import React from 'react';
-import { Attendee, Category } from 'utils';
-import { Form, List, Input, Select, Button, Icon } from 'antd';
-import styled from '@styled';
-import { FormComponentProps } from 'antd/lib/form';
+import React, { useEffect } from 'react';
+import { Form, List, Input, Select, Button } from 'antd';
+import styled from 'styled-components';
+import { UserOutlined } from '@ant-design/icons';
+import { Attendee, Category } from '../../../utils/types';
 
-interface Props extends FormComponentProps {
+interface Props {
   attendee: Attendee;
   categories: Category[];
   updating: boolean;
@@ -12,99 +12,96 @@ interface Props extends FormComponentProps {
   updateAttendee(attendee: Attendee): void;
 }
 
-class AttendeeEdit extends React.Component<Props> {
-  componentDidMount() {
-    const { name, category } = this.props.attendee;
-    this.props.form.setFieldsValue({
-      name,
-      category: category ? category.id : null,
-    });
-  }
+export const AttendeeEdit = ({
+  attendee,
+  updating,
+  categories,
+  cancelEditing,
+  updateAttendee,
+}: Props) => {
+  const [form] = Form.useForm();
 
-  submitHandler = (event: React.SyntheticEvent) => {
-    event.preventDefault();
+  useEffect(() => {
+    form.setFields([
+      {
+        name: 'name',
+        value: attendee.name,
+      },
+      {
+        name: 'category',
+        value: attendee.category?.id,
+      },
+    ]);
+  }, [attendee, form]);
 
-    const { categories, updateAttendee, attendee } = this.props;
+  const onSubmit = (values: { name: string; category: string }) => {
+    const category = categories.find((a) => a.id === values.category);
 
-    this.props.form.validateFields((err, values) => {
-      if (!err) {
-        const { name, category: categoryId } = values;
-        const category = categories.find(a => a.id === categoryId)!;
-        updateAttendee({ ...attendee, name, category });
-      }
-    });
+    updateAttendee({ ...attendee, category, name: values.name });
   };
 
-  render() {
-    const { attendee, categories, cancelEditing, updating } = this.props;
+  return (
+    <List.Item>
+      <Container>
+        <Title>Editing: {attendee.name}</Title>
 
-    const { getFieldDecorator } = this.props.form;
-
-    return (
-      <List.Item>
-        <Container>
-          <Title>Editing: {attendee.name}</Title>
-
-          <Form onSubmit={this.submitHandler}>
-            <Inputs>
-              <Form.Item label="Name">
-                {getFieldDecorator('name', {
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please input attendee name!',
-                    },
-                  ],
-                })(
-                  <Input
-                    type="text"
-                    disabled={updating}
-                    prefix={
-                      <Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />
-                    }
-                    placeholder="Attendee name"
-                  />
-                )}
-              </Form.Item>
-
-              <Form.Item label="Category">
-                {getFieldDecorator('category', {
-                  rules: [
-                    {
-                      required: true,
-                      message: 'Please select attendee category!',
-                    },
-                  ],
-                })(
-                  <Select placeholder="Category">
-                    {categories.map(a => (
-                      <Select.Option value={a.id} key={a.id}>
-                        {a.name}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                )}
-              </Form.Item>
-            </Inputs>
-
-            <Buttons>
-              <Button
-                htmlType="button"
-                onClick={() => cancelEditing(attendee.id)}
+        <Form form={form} onFinish={onSubmit} layout="vertical">
+          <Inputs>
+            <Form.Item
+              label="Name"
+              name="name"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input attendee name!',
+                },
+              ]}
+            >
+              <Input
+                type="text"
                 disabled={updating}
-              >
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit" loading={updating}>
-                Update
-              </Button>
-            </Buttons>
-          </Form>
-        </Container>
-      </List.Item>
-    );
-  }
-}
+                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                placeholder="Attendee name"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Category"
+              name="category"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input attendee name!',
+                },
+              ]}
+            >
+              <Select placeholder="Category">
+                {categories.map((a) => (
+                  <Select.Option value={a.id} key={a.id}>
+                    {a.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Inputs>
+
+          <Buttons>
+            <Button
+              htmlType="button"
+              onClick={() => cancelEditing(attendee.id)}
+              disabled={updating}
+            >
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit" loading={updating}>
+              Update
+            </Button>
+          </Buttons>
+        </Form>
+      </Container>
+    </List.Item>
+  );
+};
 
 const Container = styled.div`
   width: 100%;
@@ -131,5 +128,3 @@ const Buttons = styled.footer`
     margin-right: 8px;
   }
 `;
-
-export default Form.create()(AttendeeEdit);
