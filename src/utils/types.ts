@@ -24,6 +24,14 @@ export interface Attendee {
 export interface ViewEventContext {
   categories: Category[];
   attendees: Attendee[];
+  totals: Total[];
   categoriesStatus: 'loading' | 'success';
   attendeesStatus: 'loading' | 'success';
+  totalsStatus: 'loading' | 'success';
+}
+
+export interface Total {
+  id: string;
+  name: string;
+  categories: string[];
 }

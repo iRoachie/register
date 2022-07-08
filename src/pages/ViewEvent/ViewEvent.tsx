@@ -9,6 +9,7 @@ import { SolutionOutlined, TagOutlined, UserOutlined } from '@ant-design/icons';
 import { IEvent } from '../../utils/types';
 import { useGetCategories } from '../../hooks/useGetCategories';
 import { useGetAttendees } from '../../hooks/useGetAttendees';
+import { useGetTotals } from '../../hooks/useGetTotals';
 
 export const ViewEvent = () => {
   const { eventId } = useParams();
@@ -17,6 +18,7 @@ export const ViewEvent = () => {
 
   const { categories, status: categoriesStatus } = useGetCategories(eventId!);
   const { attendees, status: attendeesStatus } = useGetAttendees(eventId!);
+  const { totals, status: totalsStatus } = useGetTotals(eventId!);
 
   useEffect(() => {
     const getEvent = async () => {
@@ -58,6 +60,8 @@ export const ViewEvent = () => {
                 attendees,
                 categoriesStatus,
                 attendeesStatus,
+                totals,
+                totalsStatus,
               }}
             />
           </ContentWrapper>
