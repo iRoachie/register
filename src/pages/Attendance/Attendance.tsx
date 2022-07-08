@@ -15,8 +15,14 @@ export const Attendance = () => {
   const { eventId } = useParams();
   usePageTitle('Attendance');
 
-  const { attendees, categories, categoriesStatus, attendeesStatus } =
-    useOutletContext<ViewEventContext>();
+  const {
+    attendees,
+    categories,
+    categoriesStatus,
+    attendeesStatus,
+    totals,
+    totalsStatus,
+  } = useOutletContext<ViewEventContext>();
 
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -67,11 +73,15 @@ export const Attendance = () => {
           a.name.toLowerCase().includes(search.toLowerCase())
         );
 
-  if (attendeesStatus !== 'success' && categoriesStatus !== 'success') {
+  if (
+    attendeesStatus !== 'success' &&
+    categoriesStatus !== 'success' &&
+    totalsStatus !== 'success'
+  ) {
     return <Loading />;
   }
 
-  const totals = categories.map((category) => {
+  const scores = categories.map((category) => {
     const attendeesForCategory = attendees.filter(
       (a) => a.category?.id === category.id && a.present
     );
@@ -79,6 +89,18 @@ export const Attendance = () => {
     return {
       ...category,
       present: attendeesForCategory.length,
+    };
+  });
+
+  const totalScores = totals.map((total) => {
+    const totalSum = total.categories.reduce((acc, curr) => {
+      acc += scores.find((a) => a.id === curr)?.present || 0;
+      return acc;
+    }, 0);
+
+    return {
+      ...total,
+      present: totalSum,
     };
   });
 
@@ -91,11 +113,19 @@ export const Attendance = () => {
         />
       ) : (
         <Items>
-          {totals.map((a) => (
-            <Score key={a.id}>
-              <Card.Meta title={`${a.present}`} description={a.name} />
-            </Score>
-          ))}
+          <>
+            {totalScores.map((a) => (
+              <Score key={a.id}>
+                <Card.Meta title={`${a.present}`} description={a.name} />
+              </Score>
+            ))}
+
+            {scores.map((a) => (
+              <Score key={a.id}>
+                <Card.Meta title={`${a.present}`} description={a.name} />
+              </Score>
+            ))}
+          </>
         </Items>
       )}
 
