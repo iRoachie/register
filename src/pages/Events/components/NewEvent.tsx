@@ -14,7 +14,7 @@ export const NewEvent = () => {
   const navigate = useNavigate();
   usePageTitle('New Event');
 
-  const onSubmit = async (name: string) => {
+  const onSubmit = async ({ name }: { name: string }) => {
     setLoading(true);
 
     try {
